@@ -1,0 +1,24 @@
+{
+  "name": "exam-question-management",
+  "version": "1.0.0",
+  "description": "现代化考题管理系统 (EQMS) - 权限管理、考题审核、版本控制、富文本公式排版与统计分析",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "node start-dev.js",
+    "seed": "cd server && npm run seed",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [
+    "exam-management",
+    "question-bank",
+    "katex",
+    "math-formulas",
+    "version-control",
+    "rbac"
+  ],
+  "author": "",
+  "license": "ISC"
+}
