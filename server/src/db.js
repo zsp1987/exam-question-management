@@ -43,6 +43,7 @@ function initSchema() {
       category TEXT DEFAULT 'Cloud Architecture',
       passing_score INTEGER DEFAULT 750,
       time_limit_minutes INTEGER DEFAULT 180,
+      minimum_total_weight INTEGER DEFAULT 100,
       status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'DRAFT', 'ARCHIVED')),
       created_by TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -59,6 +60,7 @@ function initSchema() {
       subject TEXT NOT NULL DEFAULT 'AWS Solutions Architect',
       author_id TEXT NOT NULL,
       reviewer_id TEXT,
+      deleted_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (author_id) REFERENCES users(id),
@@ -68,13 +70,15 @@ function initSchema() {
     CREATE TABLE IF NOT EXISTS exam_questions (
       exam_id TEXT NOT NULL,
       question_id TEXT NOT NULL,
+      pinned_version_id TEXT,
       domain_section TEXT DEFAULT 'Core Knowledge Domain',
       order_index INTEGER DEFAULT 1,
       score_weight REAL DEFAULT 1.0,
       added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (exam_id, question_id),
       FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE,
-      FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+      FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
+      FOREIGN KEY (pinned_version_id) REFERENCES question_versions(id)
     );
 
     CREATE TABLE IF NOT EXISTS question_versions (
@@ -83,9 +87,10 @@ function initSchema() {
       version_number INTEGER NOT NULL,
       title TEXT NOT NULL,
       stem_rich_text TEXT NOT NULL,
-      options_json TEXT, -- JSON array of { id, key, text, is_correct }
+      options_json TEXT,
       standard_answer_rich_text TEXT,
       explanation_rich_text TEXT,
+      katex_source TEXT,
       change_summary TEXT DEFAULT 'Initial Version',
       created_by TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -123,6 +128,67 @@ function initSchema() {
       details TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS kpi_daily (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      total_questions INTEGER DEFAULT 0,
+      approved_questions INTEGER DEFAULT 0,
+      pending_reviews INTEGER DEFAULT 0,
+      by_type_json TEXT,
+      by_status_json TEXT,
+      by_difficulty_json TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Idempotent column migrations for existing DBs
+  const migrate = (table, col, ddl) => {
+    try {
+      const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+      if (!cols.some(c => c.name === col)) {
+        db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+        console.log(`[migrate] added ${table}.${col}`);
+      }
+    } catch (e) {
+      console.warn(`[migrate] ${table}.${col} failed:`, e.message);
+    }
+  };
+  migrate('exams', 'minimum_total_weight', 'minimum_total_weight INTEGER DEFAULT 100');
+  migrate('questions', 'deleted_at', 'deleted_at DATETIME');
+  migrate('exam_questions', 'pinned_version_id', 'pinned_version_id TEXT');
+  migrate('question_versions', 'katex_source', 'katex_source TEXT');
+
+  // Backfill pinned_version_id for existing rows (current_version_id where APPROVED)
+  try {
+    const rows = db.prepare(`
+      SELECT eq.exam_id, eq.question_id, q.current_version_id, q.status
+      FROM exam_questions eq
+      JOIN questions q ON eq.question_id = q.id
+      WHERE eq.pinned_version_id IS NULL
+    `).all();
+    if (rows.length > 0) {
+      const upd = db.prepare('UPDATE exam_questions SET pinned_version_id = ? WHERE exam_id = ? AND question_id = ?');
+      let filled = 0;
+      rows.forEach(r => {
+        if (r.current_version_id) {
+          upd.run(r.current_version_id, r.exam_id, r.question_id);
+          filled++;
+        }
+      });
+      if (filled) console.log(`[migrate] backfilled pinned_version_id for ${filled} exam_questions`);
+    }
+  } catch (e) {
+    console.warn('[migrate] pinned_version_id backfill failed:', e.message);
+  }
+
+  // Composite indices
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_questions_status_type_difficulty_subject ON questions(status, type, difficulty, subject);
+    CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_pinned ON exam_questions(exam_id, pinned_version_id);
+    CREATE INDEX IF NOT EXISTS idx_questions_deleted_at ON questions(deleted_at);
+    CREATE INDEX IF NOT EXISTS idx_questions_author_id ON questions(author_id);
+    CREATE INDEX IF NOT EXISTS idx_question_versions_qid_vnum ON question_versions(question_id, version_number);
   `);
 }
 

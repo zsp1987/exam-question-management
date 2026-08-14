@@ -18,7 +18,7 @@
 - 导出引擎升级：支持直接针对某场认证考试导出符合考纲标准的完整试卷包与考点覆盖率报告。
 
 ### 3. 可视化表格生成与动态修改工具
-- `FormulaToolbar` 与 `RichEditor` 集成类似 Word/Typora 的 $10 \times 10$ 动态网格选择器，鼠标移动直接实时选定表格行列数。
+- `FormulaToolbar` 与 `RichEditor` 集成类似 Word/Typora 的 $8 \\times 8$ 动态网格选择器，鼠标移动直接实时选定表格行列数。
 - 增加快速表格操作工具栏（增加行、删除行、增加列、删除列、表头切换）。
 
 ## Consequences
