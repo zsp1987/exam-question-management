@@ -15,6 +15,7 @@ import ReportsPage from "./pages/ReportsPage";
 import AdminConsolePage from "./pages/AdminConsolePage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
+import Breadcrumb from "./components/Breadcrumb";
 
 function MainApp() {
 	const { user, loading } = useAuth();
@@ -147,6 +148,7 @@ function MainApp() {
 			<div className="flex-1 flex max-w-[1280px] w-full mx-auto">
 				<Sidebar currentTab={currentTab} onNavigate={handleNavigate} />
 				<main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-5xl w-full">
+					<Breadcrumb currentTab={currentTab} onNavigate={handleNavigate} />
 					{renderContent()}
 				</main>
 			</div>
