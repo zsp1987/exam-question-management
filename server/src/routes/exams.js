@@ -19,7 +19,11 @@ function formatQuestionRow(q) {
 }
 
 // 1. Get all certification exam folders
-router.get('/', (req, res) => {
+router.get('/', authenticateToken, (req, res) => {
+  // 1a/4a/5a: WRITER pure cannot access exam library; VIEWER can (read-only)
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && req.user.role !== 'ADMIN' && req.user.role !== 'REVIEWER') {
+    return res.status(403).json({ error: 'Forbidden: writer has no access to exam library' });
+  }
   const { category, status } = req.query;
   const where = ['1=1'];
   const params = [];
@@ -40,7 +44,10 @@ router.get('/', (req, res) => {
 });
 
 // 2. Get single certification exam folder with all included questions (via pinned_version_id)
-router.get('/:id', (req, res) => {
+router.get('/:id', authenticateToken, (req, res) => {
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && req.user.role !== 'ADMIN' && req.user.role !== 'REVIEWER') {
+    return res.status(403).json({ error: 'Forbidden: writer has no access to exam library' });
+  }
   const { id } = req.params;
   const exam = db.prepare(`SELECT e.*, u.name as creator_name FROM exams e LEFT JOIN users u ON e.created_by = u.id WHERE e.id = ?`).get(id);
   if (!exam) return res.status(404).json({ error: '认证考试文件夹不存在' });

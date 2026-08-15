@@ -39,6 +39,12 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
 | View DRAFT/PENDING/REJECTED | Y | Y | own-only | N | N |
 | Manage users/roles | Y | N | N | N | N |
 
+
+
+**导航约束（2025 Q4，1a/2c/3a/4a/5a 落地）**
+- WRITER（纯 Writer）：侧边栏仅 `Question Repository` + `Draft New Question`；数据层 `visibilityClause` 强制 `author_id = self`（任意状态），`authorId` 非本人 403，`/api/exams` 403，`/api/stats/overview` 403。
+- VIEWER：侧边栏仅 `Exam Library`（只读）与 `Question Repository`（APPROVED 只读）；`Reports` / `Review` / `Admin` / `Create` 对 VIEWER 隐藏且接口 403；`Exam Library` 对 VIEWER 保留读。
+
 - 自审：允许 `author_id == reviewer_id`（有意为之，见 ADR-0004）。
 - REVIEWER 评审范围：全局（不按 category 限域）。
 - 并发：所有写操作基于 `version_number`/`updated_at` 乐观锁，冲突 409。

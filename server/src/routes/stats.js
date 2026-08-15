@@ -6,6 +6,11 @@ const { authenticateToken } = require('../middleware/auth');
 
 // 1. Overview Statistics (VIEWER sees APPROVED-only per CONTEXT §4)
 router.get('/overview', authenticateToken, (req, res) => {
+  const isPureWriter = (req.user.role === 'WRITER' || req.user.role === 'TEACHER') && req.user.role !== 'ADMIN' && req.user.role !== 'REVIEWER';
+  const isViewerOnly = req.user.role === 'VIEWER';
+  if (isPureWriter || isViewerOnly) {
+    return res.status(403).json({ error: 'Forbidden: insufficient permissions for reports' });
+  }
   try {
     const isViewer = req.user && req.user.role === 'VIEWER';
     const isTeacher = req.user && (req.user.role === 'WRITER' || req.user.role === 'TEACHER');
@@ -14,7 +19,8 @@ router.get('/overview', authenticateToken, (req, res) => {
     if (isViewer) {
       scopeClause = "status = 'APPROVED' AND deleted_at IS NULL";
     } else if (isTeacher) {
-      scopeClause = "(deleted_at IS NULL AND (status = 'APPROVED' OR author_id = ?))";
+      // 2c: writer sees only own
+      scopeClause = "deleted_at IS NULL AND author_id = ?";
       scopeParams = [req.user.id];
     } else {
       scopeClause = 'deleted_at IS NULL';

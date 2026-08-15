@@ -13,10 +13,11 @@ EQMS 是专为**专业资格与技术认证考试**（如 AWS/GCP 云架构师�
 - **WRITER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
 - **VIEWER (认证稽核员 / 考生助教)**: 只读浏览**仅 APPROVED** 题库、查看考题解析、试卷导出与报表分析（KPI 亦仅统计 APPROVED）。
 
-**可见性规则（Visibility）**
-- ADMIN/REVIEWER：可见全部状态。
-- WRITER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
-- VIEWER：仅可见 APPROVED（含导出与报表）。
+**可见性规则（Visibility）与导航约束（2025 Q4 收紧）**
+- ADMIN：可见全部状态；导航全部。
+- REVIEWER：可见全部状态；导航全部除 Admin。
+- WRITER（纯 Writer，非 REVIEWER/ADMIN）：**仅可见本人**创建的题目（任意状态，`author_id = self`，含本人 APPROVED，不可见他人任何题目）；导航仅 `Question Repository` + `Draft New Question`（经 `Sidebar` + `App.jsx` 路由守卫 + 后端 `visibilityClause` 强制，`/api/exams` 403，`/api/stats/overview` 403）；创建经仓库内按钮（3a）。
+- VIEWER：仅可见 `APPROVED`；导航仅 `Exam Library`（只读，`/api/exams` 可读）与 `Question Repository`（APPROVED 只读），`Reports` / `Review` / `Admin` / `Create` 均屏蔽（4a/5a）。
 
 **自审策略**：允许 `author_id == reviewer_id`（自审不被禁止），有意为之（见 ADR-0004）。
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { I18nProvider, useI18n } from "./context/I18nContext";
@@ -22,10 +22,37 @@ function MainApp() {
 	const { t } = useI18n();
 
 	// Navigation state
-	const [currentTab, setCurrentTab] = useState("exam-folders"); // Default to exam folders / certification overview
+	const [currentTab, setCurrentTab] = useState("exam-folders");
 	const [editingQuestionId, setEditingQuestionId] = useState(null);
 	const [detailQuestionId, setDetailQuestionId] = useState(null);
 	const [selectedExamId, setSelectedExamId] = useState(null);
+
+	// Enforce nav guards: redirect writer/viewer if they land on forbidden tab (direct URL / stale state)
+	// Must be above early returns to keep Rules of Hooks stable (hook order must not change between renders).
+	useEffect(() => {
+		if (!user) return;
+		const role = user.role;
+		const pw = role === "WRITER" || role === "TEACHER";
+		const isPureWriter = pw && role !== "ADMIN" && role !== "REVIEWER";
+		const isViewer = role === "VIEWER";
+		const writerAllowed = new Set(["questions", "create-question", "question-detail", "profile"]);
+		const viewerAllowed = new Set(["exam-folders", "exam-folder-detail", "questions", "question-detail", "profile"]);
+		if (isPureWriter && !writerAllowed.has(currentTab)) setCurrentTab("questions");
+		if (isViewer && !viewerAllowed.has(currentTab)) setCurrentTab("exam-folders");
+	}, [user, currentTab]);
+
+	// Default tab per role from JWT on first load (before user hydration, still gates initial view)
+	useEffect(() => {
+		if (loading || user) return;
+		try {
+			const tok = localStorage.getItem("eqms_token");
+			if (!tok) return;
+			const payload = JSON.parse(atob(tok.split(".")[1]));
+			if ((payload.role === "WRITER" || payload.role === "TEACHER") && currentTab === "exam-folders") {
+				setCurrentTab("questions");
+			}
+		} catch {}
+	}, [loading, user, currentTab]);
 
 	if (loading) {
 		return (
@@ -42,7 +69,19 @@ function MainApp() {
 		return <LoginPage />;
 	}
 
+
 	const handleNavigate = (tab) => {
+		// Guard: block writer from exam-library/reports/reviews/admin, viewer from create/reviews/reports/admin
+		if (user) {
+			const role = user.role;
+			const isPw = role === "WRITER" || role === "TEACHER";
+			const isV = role === "VIEWER";
+			const isAdmin = role === "ADMIN";
+			const isRev = role === "REVIEWER" || isAdmin;
+			const isPureWriter = isPw && !isRev;
+			if (isPureWriter && !["questions", "create-question", "question-detail", "profile"].includes(tab)) return;
+			if (isV && !["exam-folders", "exam-folder-detail", "questions", "question-detail", "profile"].includes(tab)) return;
+		}
 		setCurrentTab(tab);
 		setEditingQuestionId(null);
 		setDetailQuestionId(null);

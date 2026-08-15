@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	FolderCheck,
 	Layers,
 	PlusCircle,
 	CheckSquare,
 	BarChart3,
-	Users,
-	Tags,
-	History,
 	ShieldAlert,
 	Sparkles,
 } from "lucide-react";
@@ -19,6 +16,8 @@ export default function Sidebar({ currentTab, onNavigate }) {
 	const { user, isAdmin, isReviewer, isTeacher } = useAuth();
 	const { t } = useI18n();
 	const [pendingCount, setPendingCount] = useState(0);
+	const isViewer = user?.role === 'VIEWER';
+	const isPureWriter = (user?.role === 'WRITER' || user?.role === 'TEACHER') && !isReviewer; // writer who is not also reviewer/admin
 
 	useEffect(() => {
 		async function fetchPendingCount() {
@@ -39,7 +38,7 @@ export default function Sidebar({ currentTab, onNavigate }) {
 			id: "exam-folders",
 			label: t("navExamFolders"),
 			icon: FolderCheck,
-			show: true,
+			show: !isPureWriter,
 			desc: t("navExamFoldersDesc"),
 		},
 		{
@@ -53,7 +52,7 @@ export default function Sidebar({ currentTab, onNavigate }) {
 			id: "create-question",
 			label: t("navCreateQuestion"),
 			icon: PlusCircle,
-			show: isTeacher,
+			show: isTeacher && !isViewer,
 			highlight: true,
 			desc: t("navCreateQuestionDesc"),
 		},
@@ -69,7 +68,7 @@ export default function Sidebar({ currentTab, onNavigate }) {
 			id: "reports",
 			label: t("navReports"),
 			icon: BarChart3,
-			show: true,
+			show: !isPureWriter && !isViewer,
 			desc: t("navReportsDesc"),
 		},
 	];

@@ -29,15 +29,17 @@ function formatQuestionRow(q) {
 }
 
 function visibilityClause(user) {
-  // Returns SQL fragment and params for visibility
   if (!user) return { clause: "q.deleted_at IS NULL AND q.status = 'APPROVED'", params: [] };
   if (user.role === 'ADMIN' || user.role === 'REVIEWER') {
     return { clause: 'q.deleted_at IS NULL', params: [] };
   }
+  // WRITER (pure writer): strict own-only, any status (DRAFT..APPROVED) but only author_id = self
+  // REVIEWER who is also writer is handled above as REVIEWER sees all, so this branch = pure writer
+  // 2c strict: must check user is not REVIEWER/ADMIN already handled
   if ((user.role === 'WRITER' || user.role === 'TEACHER')) {
-    return { clause: "(q.deleted_at IS NULL AND (q.status = 'APPROVED' OR q.author_id = ?))", params: [user.id] };
+    return { clause: "q.deleted_at IS NULL AND q.author_id = ?", params: [user.id] };
   }
-  // VIEWER
+  // VIEWER: APPROVED only
   return { clause: "q.deleted_at IS NULL AND q.status = 'APPROVED'", params: [] };
 }
 
@@ -76,14 +78,17 @@ router.get('/', authenticateToken, (req, res) => {
       if (req.user.role === 'VIEWER' && status !== 'APPROVED') {
         return res.status(403).json({ error: 'VIEWER 仅可查看已批准题目' });
       }
-      if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && ['DRAFT','PENDING_REVIEW','REJECTED'].includes(status)) {
-        // Teacher can only list own drafts - additional author check is handled via visibilityClause already
-      }
+      // no-op: writer visibility already own-only, no extra path needed
       whereClauses.push('q.status = ?'); params.push(status);
     }
     if (difficulty) { whereClauses.push('q.difficulty = ?'); params.push(parseInt(difficulty, 10)); }
     if (subject) { whereClauses.push('q.subject = ?'); params.push(subject); }
-    if (authorId) { whereClauses.push('q.author_id = ?'); params.push(authorId); }
+    if (authorId) {
+      if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && req.user.role !== 'ADMIN' && req.user.role !== 'REVIEWER' && authorId !== req.user.id) {
+        return res.status(403).json({ error: 'Forbidden: writer can only view own questions' });
+      }
+      whereClauses.push('q.author_id = ?'); params.push(authorId);
+    }
     if (tagId) {
       whereClauses.push(`EXISTS (SELECT 1 FROM question_tags qt WHERE qt.question_id = q.id AND qt.tag_id = ?)`);
       params.push(tagId);
