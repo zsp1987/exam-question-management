@@ -66,7 +66,7 @@ export default function QuestionDetailPage({ questionId, onBack, onEdit }) {
 
   if (error || !question) {
     return (
-      <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+      <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
         <p className="text-rose-600 text-sm mb-4">{error || 'Item not found'}</p>
         <button
           type="button"
@@ -144,7 +144,7 @@ export default function QuestionDetailPage({ questionId, onBack, onEdit }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Question Content */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2.5 py-1 text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200 rounded-lg">
@@ -246,7 +246,7 @@ export default function QuestionDetailPage({ questionId, onBack, onEdit }) {
 
         {/* Right: Version Timeline */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <History className="w-4 h-4 text-brand-600" />
@@ -322,7 +322,7 @@ export default function QuestionDetailPage({ questionId, onBack, onEdit }) {
           </div>
 
           {/* Review Stream */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-3">
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <MessageSquare className="w-4 h-4 text-amber-600" />
               Review Audit Records ({reviewHistory.length})

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, Mail, Shield, Camera, Save, Lock, AtSign } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
@@ -14,6 +14,18 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
+
+  // Keep form in sync if user is refreshed (e.g. after avatar upload or profile save)
+  const prevUserIdRef = useRef(user?.id);
+  useEffect(() => {
+    if (user && user.id !== prevUserIdRef.current) {
+      prevUserIdRef.current = user.id;
+    }
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+    }
+  }, [user?.id, user?.name, user?.email]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -74,7 +86,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
         <h1 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
           <User className="w-5 h-5 text-brand-600" />
           {lang === "en" ? "Profile Settings" : "个人设置"}
@@ -89,7 +101,7 @@ export default function ProfilePage() {
       {err && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs px-4 py-3 rounded-xl">{err}</div>}
       {msg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs px-4 py-3 rounded-xl">{msg}</div>}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-6">
         {/* Avatar */}
         <div className="flex items-center gap-5">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 flex items-center justify-center shrink-0">

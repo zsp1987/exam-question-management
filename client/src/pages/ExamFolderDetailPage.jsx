@@ -121,7 +121,7 @@ export default function ExamFolderDetailPage({ examId, onBack, onViewQuestion })
       </div>
 
       {/* Exam Header Banner */}
-      <div className="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl space-y-4">
+      <div className="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-xl p-6 sm:p-8 text-white shadow-xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="px-3 py-1 text-xs font-mono font-extrabold bg-white/20 backdrop-blur-md rounded-lg border border-white/20">
             {exam.code}
@@ -164,7 +164,7 @@ export default function ExamFolderDetailPage({ examId, onBack, onViewQuestion })
       </div>
 
       {/* Assigned Questions List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <FolderCheck className="w-4 h-4 text-brand-600" />
@@ -233,7 +233,7 @@ export default function ExamFolderDetailPage({ examId, onBack, onViewQuestion })
       {/* Add Approved Questions Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-slate-200 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 border border-slate-200 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Plus className="w-4 h-4 text-brand-600" />

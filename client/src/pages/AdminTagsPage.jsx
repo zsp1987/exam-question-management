@@ -71,7 +71,7 @@ export default function AdminTagsPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
             <Tags className="w-5 h-5 text-brand-600" />
@@ -105,7 +105,7 @@ export default function AdminTagsPage() {
       {/* Category Groups */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Object.entries(categories).map(([catName, tagList]) => (
-          <div key={catName} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3">
+          <div key={catName} className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-brand-600" />
@@ -139,7 +139,7 @@ export default function AdminTagsPage() {
       {/* Create Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Tags className="w-4 h-4 text-brand-600" />

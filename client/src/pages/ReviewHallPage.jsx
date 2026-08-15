@@ -44,7 +44,7 @@ export default function ReviewHallPage({ onViewQuestion, onEditQuestion }) {
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-brand-500/5 to-purple-500/10 rounded-2xl p-6 border border-amber-200/60 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-amber-500/10 via-brand-500/5 to-purple-500/10 rounded-xl p-6 border border-amber-200/60 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
@@ -104,7 +104,7 @@ export default function ReviewHallPage({ onViewQuestion, onEditQuestion }) {
           {loading ? (
             <div className="py-20 text-center text-slate-500 text-xs">{t('loading')}</div>
           ) : pendingQuestions.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
+            <div className="bg-white rounded-xl p-12 text-center border border-slate-200 space-y-3">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
               <h3 className="text-base font-bold text-slate-800">
                 {lang === 'en' ? 'All certification items have been reviewed!' : '所有考题均已完成审核！'}
@@ -118,7 +118,7 @@ export default function ReviewHallPage({ onViewQuestion, onEditQuestion }) {
               {pendingQuestions.map((q) => (
                 <div
                   key={q.id}
-                  className="bg-white rounded-2xl border-2 border-amber-200/80 shadow-xs hover:shadow-md transition p-5 space-y-4"
+                  className="bg-white rounded-xl border-2 border-amber-200/80 shadow-xs hover:shadow-md transition p-5 space-y-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -243,7 +243,7 @@ export default function ReviewHallPage({ onViewQuestion, onEditQuestion }) {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-amber-600" />
             {t('reviewHistory')}

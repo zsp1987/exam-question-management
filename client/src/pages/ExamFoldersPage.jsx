@@ -93,7 +93,7 @@ export default function ExamFoldersPage({ onSelectExam }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
             <FolderCheck className="w-5 h-5 text-brand-600" />
@@ -120,7 +120,7 @@ export default function ExamFoldersPage({ onSelectExam }) {
       {loading ? (
         <div className="py-20 text-center text-slate-500 text-xs">{t('loading')}</div>
       ) : exams.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
+        <div className="bg-white rounded-xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
           {t('noData')}
         </div>
       ) : (
@@ -128,7 +128,7 @@ export default function ExamFoldersPage({ onSelectExam }) {
           {exams.map((exam) => (
             <div
               key={exam.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition p-6 flex flex-col justify-between space-y-4 group"
+              className="bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-md transition p-6 flex flex-col justify-between space-y-4 group"
             >
               <div className="space-y-3">
                 {/* Top Meta */}
@@ -213,7 +213,7 @@ export default function ExamFoldersPage({ onSelectExam }) {
       {/* Add Exam Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <FolderCheck className="w-4 h-4 text-brand-600" />

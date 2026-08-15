@@ -102,3 +102,23 @@
     page-break-inside: avoid;
   }
 }
+
+
+/* ---------- Professional compact pass ---------- */
+:root{ --radius: 10px; }
+
+/* Dark mode base overrides */
+html.dark body{ background:#020617; color:#f1f5f9; }
+html.dark ::-webkit-scrollbar-thumb{ background:#334155; }
+html.dark ::-webkit-scrollbar-thumb:hover{ background:#475569; }
+
+/* Make rounded-2xl a touch more editorial (less pill-y) in dark */
+html.dark .bg-white{ background-color:#0f172a !important; border-color:#1e293b !important; color:#e2e8f0; }
+html.dark .bg-slate-50{ background-color:#1e293b; }
+html.dark .bg-slate-50\/70{ background-color:rgba(30,41,59,0.6); }
+html.dark .border-slate-200{ border-color:#334155; }
+html.dark .border-slate-100{ border-color:#1e293b; }
+html.dark .text-slate-900{ color:#f1f5f9; }
+html.dark .text-slate-700{ color:#cbd5e1; }
+html.dark .text-slate-600{ color:#94a3b8; }
+html.dark .text-slate-500{ color:#94a3b8; }

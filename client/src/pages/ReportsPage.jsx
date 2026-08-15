@@ -94,7 +94,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-8 pb-16">
       {/* Top Header */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-brand-600" />
@@ -108,7 +108,7 @@ export default function ReportsPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-xs font-bold text-slate-500 block mb-1">{t('totalPoolSize')}</span>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">{summary.totalQuestions}</span>
@@ -116,7 +116,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-xs font-bold text-amber-600 block mb-1">{t('statusPendingReview')}</span>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-amber-600">{summary.pendingReviews}</span>
@@ -124,7 +124,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-xs font-bold text-emerald-600 block mb-1">{t('statusApproved')}</span>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600">{summary.approvedQuestions}</span>
@@ -132,7 +132,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
           <span className="text-xs font-bold text-brand-600 block mb-1">{t('passingRate')}</span>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-brand-600">{summary.approvalRate}%</span>
@@ -143,7 +143,7 @@ export default function ReportsPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* 1. By Question Type */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
             <PieChart className="w-4 h-4 text-brand-600" />
             {t('typeComposition')}
@@ -172,7 +172,7 @@ export default function ReportsPage() {
         </div>
 
         {/* 2. By Difficulty */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
             <BarChart3 className="w-4 h-4 text-amber-500" />
             {t('difficultyDistribution')}
@@ -199,7 +199,7 @@ export default function ReportsPage() {
         </div>
 
         {/* 3. By Subject */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
             <BookOpen className="w-4 h-4 text-purple-600" />
             {t('subjectCoverage')}
@@ -227,7 +227,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Assembly & Export Engine */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -303,7 +303,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Paper Preview Canvas */}
-        <div className="border border-slate-200 rounded-2xl p-6 sm:p-8 bg-slate-50/40 space-y-6">
+        <div className="border border-slate-200 rounded-xl p-6 sm:p-8 bg-slate-50/40 space-y-6">
           <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               {exportSubject || 'Comprehensive'} Professional Certification Examination

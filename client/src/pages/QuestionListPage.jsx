@@ -121,7 +121,7 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
   return (
     <div className="space-y-6">
       {/* Top Header & Search Bar */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -272,7 +272,7 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
           <p className="text-xs text-slate-500">{t('loading')}</p>
         </div>
       ) : questions.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
+        <div className="bg-white rounded-xl p-12 text-center border border-slate-200 space-y-3">
           <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
           <h3 className="text-sm font-bold text-slate-700">{t('noData')}</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">

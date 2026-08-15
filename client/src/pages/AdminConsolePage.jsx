@@ -21,7 +21,7 @@ export default function AdminConsolePage({ initialTab = "roles" }) {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-purple-600" />
           <h1 className="text-xl font-extrabold text-slate-900">{t("adminConsole")}</h1>

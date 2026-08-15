@@ -280,7 +280,7 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
       )}
 
       {/* Main Form */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-6">
         <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -447,7 +447,7 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
 
         {/* Options Management */}
         {(type === 'SINGLE_CHOICE' || type === 'MULTIPLE_CHOICE') && (
-          <div className="space-y-3 p-4 bg-slate-50/70 rounded-2xl border border-slate-200">
+          <div className="space-y-3 p-4 bg-slate-50/70 rounded-xl border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">

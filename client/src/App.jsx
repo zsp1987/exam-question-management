@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { I18nProvider, useI18n } from "./context/I18nContext";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -141,9 +142,9 @@ function MainApp() {
 	};
 
 	return (
-		<div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
+		<div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100">
 			<Navbar onNavigate={handleNavigate} currentTab={currentTab} />
-			<div className="flex-1 flex max-w-7xl w-full mx-auto">
+			<div className="flex-1 flex max-w-[1280px] w-full mx-auto">
 				<Sidebar currentTab={currentTab} onNavigate={handleNavigate} />
 				<main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-5xl w-full">
 					{renderContent()}
@@ -156,9 +157,11 @@ function MainApp() {
 export default function App() {
 	return (
 		<I18nProvider>
-			<AuthProvider>
-				<MainApp />
-			</AuthProvider>
+			<ThemeProvider>
+				<AuthProvider>
+					<MainApp />
+				</AuthProvider>
+			</ThemeProvider>
 		</I18nProvider>
 	);
 }

@@ -76,11 +76,11 @@ export default function Sidebar({ currentTab, onNavigate }) {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between shrink-0 min-h-[calc(100vh-4rem)]">
-      <div className="space-y-6">
+    <aside className="w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 px-3 py-4 flex flex-col justify-between shrink-0 min-h-[calc(100vh-3.5rem)]">
+      <div className="space-y-5">
         {/* Main Navigation */}
         <div>
-          <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+          <p className="px-2 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">
             {t('coreWorkflow')}
           </p>
           <div className="space-y-1">
