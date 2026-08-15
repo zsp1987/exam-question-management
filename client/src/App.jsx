@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { I18nProvider, useI18n } from './context/I18nContext';
 import Navbar from './components/Navbar';
@@ -14,6 +14,7 @@ import ReportsPage from './pages/ReportsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminTagsPage from './pages/AdminTagsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
+import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 
 function MainApp() {
@@ -123,6 +124,9 @@ function MainApp() {
 
       case 'admin-audit':
         return <AuditLogsPage />;
+
+      case 'profile':
+        return <ProfilePage />;
 
       default:
         return (

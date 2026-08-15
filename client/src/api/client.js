@@ -52,6 +52,17 @@ export const api = {
   }),
   getDemoUsers: () => request('/auth/demo-users'),
   getMe: () => request('/auth/me'),
+  updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  uploadAvatar: (formData) => {
+    const token = getStoredToken();
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    // Don't set Content-Type for FormData — browser sets multipart boundary
+    return fetch(`${API_BASE}/auth/avatar`, { method: 'POST', headers, body: formData }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Upload failed: ${res.status}`);
+      return data;
+    });
+  },
 
   // Certification Exam Folders
   getExams: (params = {}) => {

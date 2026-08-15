@@ -64,6 +64,22 @@ export function AuthProvider({ children }) {
     return res.user;
   };
 
+  const updateProfile = async (data) => {
+    const res = await api.updateProfile(data);
+    if (res.token) setStoredToken(res.token);
+    if (res.user) setUser(res.user);
+    return res;
+  };
+
+  const uploadAvatar = async (file) => {
+    const form = new FormData();
+    form.append('avatar', file);
+    const res = await api.uploadAvatar(form);
+    if (res.token) setStoredToken(res.token);
+    if (res.user) setUser(res.user);
+    return res;
+  };
+
   const logout = () => {
     setStoredToken(null);
     setUser(null);
@@ -79,6 +95,8 @@ export function AuthProvider({ children }) {
     loading,
     login,
     switchUser,
+    updateProfile,
+    uploadAvatar,
     logout,
     isAdmin,
     isReviewer,
