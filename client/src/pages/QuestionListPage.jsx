@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Filter, Plus, RefreshCw, Layers, LayoutGrid, 
+  Search, Filter, Plus, RefreshCw, Layers, LayoutGrid, List, 
   ListFilter, Star, AlertCircle, CheckCircle2, Clock, 
   XCircle, Sparkles, Tag, BookOpen
 } from 'lucide-react';
 import { api } from '../api/client';
 import QuestionCard from '../components/QuestionCard';
+import QuestionTable from '../components/QuestionTable';
 import VersionDiffModal from '../components/VersionDiffModal';
 import ReviewModal from '../components/ReviewModal';
 import AssignExamModal from '../components/AssignExamModal';
@@ -18,6 +19,7 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('eqms_q_view') || 'grid'); // grid | table
   
   // Search & Filter states
   const [keyword, setKeyword] = useState('');
@@ -81,6 +83,10 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
   useEffect(() => {
     fetchQuestions(1);
   }, [type, status, subject, difficulty, selectedTagId, sortBy]);
+
+  useEffect(() => {
+    localStorage.setItem('eqms_q_view', viewMode);
+  }, [viewMode]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -290,6 +296,26 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
           )}
         </div>
       ) : (
+        <>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-slate-500">{pagination.total} items</span>
+          <div className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <button type="button" onClick={() => setViewMode('grid')} title="Grid view" className={`p-1.5 ${viewMode==='grid' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}><LayoutGrid className="w-4 h-4" /></button>
+            <button type="button" onClick={() => setViewMode('table')} title="Table view" className={`p-1.5 ${viewMode==='table' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}><List className="w-4 h-4" /></button>
+          </div>
+        </div>
+        {viewMode === 'table' ? (
+          <QuestionTable
+            questions={questions}
+            onViewDetails={onViewQuestion}
+            onEdit={onEditQuestion}
+            onOpenDiff={(targetQ) => setDiffModalQuestion(targetQ)}
+            onOpenReview={(targetQ) => setReviewModalQuestion(targetQ)}
+            onSubmitReview={handleSubmitReview}
+            onDelete={handleDeleteQuestion}
+            onAssignExam={(targetQ) => setAssignModalQuestion(targetQ)}
+          />
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {questions.map((q) => (
             <QuestionCard
@@ -305,6 +331,8 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
             />
           ))}
         </div>
+        )}
+        </>
       )}
 
       {/* Pagination Footer */}
