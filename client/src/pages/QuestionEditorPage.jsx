@@ -8,7 +8,7 @@ import TagBadge from '../components/TagBadge';
 import { api } from '../api/client';
 import { useI18n } from '../context/I18nContext';
 
-export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
+export default function QuestionEditorPage({ questionId, onCancel, onSaved, taskId }) {
   const { t, lang } = useI18n();
   const isEditMode = Boolean(questionId);
 
@@ -220,6 +220,10 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
       if (isEditMode) {
         await api.updateQuestion(questionId, payload);
         alert(submitForReview ? (lang === 'en' ? 'Question updated and submitted for review!' : '考题已更新并提交至审核大厅！') : t('success'));
+      } else if (taskId) {
+        // Task-bound creation: use same draft form but via tasks endpoint (validates type/difficulty/subject & cap)
+        await api.createTaskQuestion(taskId, payload);
+        alert(lang === 'en' ? 'Question created in task!' : '任务题目已创建！');
       } else {
         await api.createQuestion(payload);
         alert(submitForReview ? (lang === 'en' ? 'New question created and submitted for review!' : '新考题已创建并送审！') : t('success'));

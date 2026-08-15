@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../context/I18nContext";
 
-export default function TaskDetailPage({ taskId, onBack, onViewQuestion }) {
+export default function TaskDetailPage({ taskId, onBack, onViewQuestion, onCreateQuestion }) {
   const { user } = useAuth();
   const { lang } = useI18n();
   const [task, setTask] = useState(null);
@@ -60,12 +60,7 @@ export default function TaskDetailPage({ taskId, onBack, onViewQuestion }) {
           {task.subject && <span>Subject: {task.subject}</span>}
         </div>
         <div className="flex gap-2">
-          {canWriterCreate && <button onClick={()=> {
-            const title=prompt(lang==='en'?'Question title?':'题目标题?'); if(!title) return;
-            const stem=prompt(lang==='en'?'Stem HTML?':'题干 HTML?'); if(!stem) return;
-            const type=prompt('type SINGLE_CHOICE/MULTIPLE_CHOICE/ESSAY','ESSAY')||'ESSAY';
-            api.createTaskQuestion(taskId, { title, stem_rich_text: stem, type }).then(()=>fetchDetail()).catch(e=>alert(e.message));
-          }} className="px-3 py-1.5 text-xs font-bold bg-slate-900 text-white rounded-xl flex items-center gap-1"><Plus className="w-3.5 h-3.5" />{lang==='en'?'Add Question':'添加题目'}</button>}
+          {canWriterCreate && <button onClick={()=> onCreateQuestion(taskId)} className="px-3 py-1.5 text-xs font-bold bg-slate-900 text-white rounded-xl flex items-center gap-1"><Plus className="w-3.5 h-3.5" />{lang==='en'?'Add Question':'添加题目'}</button>}
           {canWriterSubmit && <button disabled={submitting} onClick={handleSubmitTask} className="px-4 py-1.5 text-xs font-bold bg-emerald-600 text-white rounded-xl flex items-center gap-1 disabled:opacity-50"><Send className="w-3.5 h-3.5" />{lang==='en'?'Submit Task':'提交任务'}</button>}
         </div>
       </div>

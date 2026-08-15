@@ -29,6 +29,7 @@ function MainApp() {
 	const [detailQuestionId, setDetailQuestionId] = useState(null);
 	const [selectedExamId, setSelectedExamId] = useState(null);
 	const [selectedTaskId, setSelectedTaskId] = useState(null);
+	const [taskIdForQuestionCreate, setTaskIdForQuestionCreate] = useState(null);
 
 	// Enforce nav guards: redirect writer/viewer if they land on forbidden tab (direct URL / stale state)
 	// Must be above early returns to keep Rules of Hooks stable (hook order must not change between renders).
@@ -126,6 +127,7 @@ function MainApp() {
 		setDetailQuestionId(null);
 		setSelectedExamId(null);
 		setSelectedTaskId(null);
+		setTaskIdForQuestionCreate(null);
 	};
 
 	const handleEditQuestion = (question) => {
@@ -136,6 +138,12 @@ function MainApp() {
 	const handleViewQuestion = (question) => {
 		setDetailQuestionId(question.id);
 		setCurrentTab("question-detail");
+	};
+
+	const handleCreateQuestionInTask = (tid) => {
+		setTaskIdForQuestionCreate(tid);
+		setEditingQuestionId(null);
+		setCurrentTab("create-question");
 	};
 
 	const handleSelectTask = (task) => {
@@ -175,8 +183,9 @@ function MainApp() {
 				return (
 					<QuestionEditorPage
 						questionId={editingQuestionId}
-						onCancel={() => handleNavigate("questions")}
-						onSaved={() => handleNavigate("questions")}
+						taskId={taskIdForQuestionCreate}
+						onCancel={() => { setTaskIdForQuestionCreate(null); handleNavigate(editingQuestionId ? "questions" : (taskIdForQuestionCreate ? "task-detail" : "questions")); }}
+						onSaved={() => { const tid = taskIdForQuestionCreate; setTaskIdForQuestionCreate(null); if(tid){ setSelectedTaskId(tid); setCurrentTab("task-detail"); } else handleNavigate("questions"); }}
 					/>
 				);
 
@@ -216,7 +225,13 @@ function MainApp() {
 				return <TasksPage onViewTask={handleSelectTask} />;
 
 			case "task-detail":
-				return <TaskDetailPage taskId={selectedTaskId} onBack={() => handleNavigate("tasks")} onViewQuestion={handleViewQuestion} />;
+				return (
+					<TaskDetailPage
+						taskId={selectedTaskId}
+						onBack={() => handleNavigate("tasks")}
+						onViewQuestion={handleViewQuestion}
+					/>
+				);
 
 			case "profile":
 				return <ProfilePage />;
