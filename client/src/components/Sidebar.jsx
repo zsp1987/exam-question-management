@@ -68,21 +68,9 @@ export default function Sidebar({ currentTab, onNavigate }) {
 
   const adminItems = [
     {
-      id: 'admin-users',
-      label: t('navAdminUsers'),
-      icon: Users,
-      show: isAdmin,
-    },
-    {
-      id: 'admin-tags',
-      label: t('navAdminTags'),
-      icon: Tags,
-      show: isAdmin,
-    },
-    {
-      id: 'admin-audit',
-      label: t('navAdminAudit'),
-      icon: History,
+      id: 'admin-console',
+      label: t('adminConsole'),
+      icon: ShieldAlert,
       show: isAdmin,
     },
   ];
@@ -132,10 +120,6 @@ export default function Sidebar({ currentTab, onNavigate }) {
         {/* Admin Section */}
         {isAdmin && (
           <div>
-            <p className="px-3 text-[11px] font-bold text-purple-600 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <ShieldAlert className="w-3 h-3" />
-              {t('adminConsole')}
-            </p>
             <div className="space-y-1">
               {adminItems.filter(i => i.show).map((item) => {
                 const Icon = item.icon;

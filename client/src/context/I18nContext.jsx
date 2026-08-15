@@ -26,10 +26,10 @@ const TRANSLATIONS = {
 		navReviewsDesc: "Pending review queue, rubric annotations & verdicts",
 		navReports: "Analytics & Export",
 		navReportsDesc: "Exam pool metrics, difficulty matrix & paper export",
-		navAdminUsers: "Users & RBAC Roles",
-		navAdminTags: "Exam Domains & Tags",
-		navAdminAudit: "Security Audit Trail",
-		adminConsole: "Admin Console",
+		navAdminUsers: "Roles",
+		navAdminTags: "Tags",
+		navAdminAudit: "Audit",
+		adminConsole: "Admin",
 		coreWorkflow: "Core Exam Lifecycle",
 
 		// Roles
@@ -197,10 +197,10 @@ const TRANSLATIONS = {
 		navReviewsDesc: "待审队列、评审批注与通过/驳回流转",
 		navReports: "统计报表与导出",
 		navReportsDesc: "题库大盘分析与认证试卷组装导出",
-		navAdminUsers: "用户与角色管理",
-		navAdminTags: "考点与标签管理",
-		navAdminAudit: "安全审计日志",
-		adminConsole: "管理员控制台",
+		navAdminUsers: "角色管理",
+		navAdminTags: "标签管理",
+		navAdminAudit: "审计日志",
+		adminConsole: "管理",
 		coreWorkflow: "题库核心工作流",
 
 		// Roles
