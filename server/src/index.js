@@ -11,6 +11,7 @@ const tagsRoutes = require('./routes/tags');
 const statsRoutes = require('./routes/stats');
 const adminRoutes = require('./routes/admin');
 const uploadsRoutes = require('./routes/uploads');
+const tasksRoutes = require('./routes/tasks');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -30,6 +31,7 @@ app.use('/api/tags', tagsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/uploads', uploadsRoutes);
+app.use('/api/tasks', tasksRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

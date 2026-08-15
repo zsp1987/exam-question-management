@@ -6,17 +6,21 @@ function seedDatabase() {
   console.log('Seeding Professional Certification EQMS database...');
 
   // 1. Clear existing data
+  db.exec("PRAGMA foreign_keys=OFF");
   db.exec(`
+    DELETE FROM task_reviews;
     DELETE FROM audit_logs;
     DELETE FROM review_records;
     DELETE FROM exam_questions;
     DELETE FROM question_tags;
     DELETE FROM question_versions;
     DELETE FROM questions;
+    DELETE FROM tasks;
     DELETE FROM exams;
     DELETE FROM tags;
     DELETE FROM users;
   `);
+  db.exec("PRAGMA foreign_keys=ON");
 
   const passwordHash = bcrypt.hashSync('123456', 10);
 

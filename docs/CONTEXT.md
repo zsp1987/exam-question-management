@@ -52,7 +52,36 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
-### 2.4 Question & QuestionVersion (认证考题与版本快照)
+### 2.4 Task — Writer↔Reviewer Assignment (Q1–Q5, ADR-0007)
+
+Structured top-down assignment created by **REVIEWER/ADMIN** (Q1 d) for a **single WRITER** target. Sanest defaults per grill Ledger:
+
+- **Task**: `id`, `title`, `description`, `created_by` (REVIEWER/ADMIN `id`), `assignee_id` (WRITER `id`, exactly 1 per Task, Q1 d), `status` (`IN_PROGRESS` | `IN_REVIEW` | `COMPLETED`), `required_count` (1..N, cap ≤N, can be less but no more, Q3), `current_count` (derived), `subject`/`category` (optional), `type_breakdown` (`{ SINGLE_CHOICE, MULTIPLE_CHOICE, ESSAY }` counts, validated on task question create, Q2 b), `difficulty_range` (`[min,max]` 1-5, validated, Q2 b), `target_exam_folder_id` (optional, for curation), `deadline` (ISO date, required on create & on reopen), `revision_deadline` (deadline for REVISE resubmission, set on review completion), `created_at`, `updated_at`
+- **Task status machine:**
+
+```
+  REVIEWER/ADMIN creates → IN_PROGRESS (writer creates Questions via Task)
+           │  (writer POST /api/tasks/:id/questions, validates type/difficulty/subject, exact cap ≤ required_count)
+           │  writer POST /api/tasks/:id/submit — bulk DRAFT→PENDING_REVIEW + Task IN_PROGRESS→IN_REVIEW, writer read-only on task questions (PUT/DELETE 403, GET allowed)
+           ▼
+       IN_REVIEW (reviewer batch review: per-question ACCEPT/REJECT/REVISE)
+           │  reviewer POST /api/tasks/:id/review { verdicts[], newDeadline? }
+           ├─ All ACCEPT ────────────→ COMPLETED (terminal, read-only both, REJECT terminal too)
+           ├─ Any REVISE (≥1) ───────→ IN_PROGRESS reopened + **newDeadline required** (REVISEd questions → DRAFT re-editable, ACCEPT/REJECT stay locked)
+           └─ REJECT-only (no REVISE) → COMPLETED (REJECT is terminal REJECTED, no reopen, §Q5 1a/2 close)
+```
+
+- **Invariants (sanest defaults):**
+  - **Strict Task-only for WRITER while assigned** (Q3 a): any WRITER with an `IN_PROGRESS` Task has loose `POST /api/questions` blocked (403); creation must be `POST /api/tasks/:id/questions` (auto `author_id = assignee_id`, type/difficulty/subject breakdown validated, cap ≤ `required_count`).
+  - **Cap ≤ required_count** (Q3 b less but not more): writer may create `1..required_count`, `required_count+1` → `403 count exceeded`. Submit enabled when `1 ≤ current_count ≤ required_count`.
+  - **Submit read-only** (Q4 a/b): bulk `DRAFT→PENDING_REVIEW` + `IN_REVIEW`; writer `PUT/DELETE` on task's questions → 403, `GET` allowed.
+  - **Batch review guards:** reviewer batch verdicts per Task question; `REJECT` terminal `PENDING→REJECTED` (no re-edit); `REVISE` terminal but → `DRAFT` re-editable (§Q5 1a); mixed batches: `ACCEPT/REJECT` stay locked after reopen.
+
+- **Deadline:** initial `deadline` required; on REVISE reopen `newDeadline` required; overdue shown as `isOverdue` derived (`deadline < now && status IN_PROGRESS|IN_REVIEW`).
+
+- **Visibility (matches §2.1 tightening):** WRITER sees only own Tasks + own Questions; REVIEWER/ADMIN see all Tasks; VIEWER sees none.
+
+### 2.5 Question & QuestionVersion (认证考题与版本快照)
 - **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
@@ -75,7 +104,7 @@ DRAFT ──submit──► PENDING_REVIEW ──approve──► APPROVED
 ```
 - 并发：基于 `version_number`/`updated_at` 乐观锁，冲突返回 409 Conflict。
 
-### 2.5 Tag & ReviewRecord & AuditLog
+### 2.6 Tag & ReviewRecord & AuditLog
 - **Tag**: 认证考点标签 (e.g. *High Availability*, *Zero Trust Architecture*, *OAuth 2.0 / OIDC*, *Risk Mitigation*, *Kubernetes CNI*)
 - **ReviewRecord**: 专家评审记录（含 `status`: APPROVED/REJECTED/CANCELLED — 暂无 CANCELLED 实际产生，因 PENDING 不可撤回；保留字段以备未来）、评审批注、`reviewer_id`（允许自审）
 - **AuditLog**: 全局操作日志与合规审计（记录：pin/re-pin、软删除/恢复、ARCHIVED↔ACTIVE、APPROVED→DRAFT 撤销、状态流转）
@@ -138,7 +167,36 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
-### 2.4 Question & QuestionVersion (认证考题与版本快照)
+### 2.4 Task — Writer↔Reviewer Assignment (Q1–Q5, ADR-0007)
+
+Structured top-down assignment created by **REVIEWER/ADMIN** (Q1 d) for a **single WRITER** target. Sanest defaults per grill Ledger:
+
+- **Task**: `id`, `title`, `description`, `created_by` (REVIEWER/ADMIN `id`), `assignee_id` (WRITER `id`, exactly 1 per Task, Q1 d), `status` (`IN_PROGRESS` | `IN_REVIEW` | `COMPLETED`), `required_count` (1..N, cap ≤N, can be less but no more, Q3), `current_count` (derived), `subject`/`category` (optional), `type_breakdown` (`{ SINGLE_CHOICE, MULTIPLE_CHOICE, ESSAY }` counts, validated on task question create, Q2 b), `difficulty_range` (`[min,max]` 1-5, validated, Q2 b), `target_exam_folder_id` (optional, for curation), `deadline` (ISO date, required on create & on reopen), `revision_deadline` (deadline for REVISE resubmission, set on review completion), `created_at`, `updated_at`
+- **Task status machine:**
+
+```
+  REVIEWER/ADMIN creates → IN_PROGRESS (writer creates Questions via Task)
+           │  (writer POST /api/tasks/:id/questions, validates type/difficulty/subject, exact cap ≤ required_count)
+           │  writer POST /api/tasks/:id/submit — bulk DRAFT→PENDING_REVIEW + Task IN_PROGRESS→IN_REVIEW, writer read-only on task questions (PUT/DELETE 403, GET allowed)
+           ▼
+       IN_REVIEW (reviewer batch review: per-question ACCEPT/REJECT/REVISE)
+           │  reviewer POST /api/tasks/:id/review { verdicts[], newDeadline? }
+           ├─ All ACCEPT ────────────→ COMPLETED (terminal, read-only both, REJECT terminal too)
+           ├─ Any REVISE (≥1) ───────→ IN_PROGRESS reopened + **newDeadline required** (REVISEd questions → DRAFT re-editable, ACCEPT/REJECT stay locked)
+           └─ REJECT-only (no REVISE) → COMPLETED (REJECT is terminal REJECTED, no reopen, §Q5 1a/2 close)
+```
+
+- **Invariants (sanest defaults):**
+  - **Strict Task-only for WRITER while assigned** (Q3 a): any WRITER with an `IN_PROGRESS` Task has loose `POST /api/questions` blocked (403); creation must be `POST /api/tasks/:id/questions` (auto `author_id = assignee_id`, type/difficulty/subject breakdown validated, cap ≤ `required_count`).
+  - **Cap ≤ required_count** (Q3 b less but not more): writer may create `1..required_count`, `required_count+1` → `403 count exceeded`. Submit enabled when `1 ≤ current_count ≤ required_count`.
+  - **Submit read-only** (Q4 a/b): bulk `DRAFT→PENDING_REVIEW` + `IN_REVIEW`; writer `PUT/DELETE` on task's questions → 403, `GET` allowed.
+  - **Batch review guards:** reviewer batch verdicts per Task question; `REJECT` terminal `PENDING→REJECTED` (no re-edit); `REVISE` terminal but → `DRAFT` re-editable (§Q5 1a); mixed batches: `ACCEPT/REJECT` stay locked after reopen.
+
+- **Deadline:** initial `deadline` required; on REVISE reopen `newDeadline` required; overdue shown as `isOverdue` derived (`deadline < now && status IN_PROGRESS|IN_REVIEW`).
+
+- **Visibility (matches §2.1 tightening):** WRITER sees only own Tasks + own Questions; REVIEWER/ADMIN see all Tasks; VIEWER sees none.
+
+### 2.5 Question & QuestionVersion (认证考题与版本快照)
 - **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
@@ -161,7 +219,7 @@ DRAFT ──submit──► PENDING_REVIEW ──approve──► APPROVED
 ```
 - 并发：基于 `version_number`/`updated_at` 乐观锁，冲突返回 409 Conflict。
 
-### 2.5 Tag & ReviewRecord & AuditLog
+### 2.6 Tag & ReviewRecord & AuditLog
 - **Tag**: 认证考点标签 (e.g. *High Availability*, *Zero Trust Architecture*, *OAuth 2.0 / OIDC*, *Risk Mitigation*, *Kubernetes CNI*)
 - **ReviewRecord**: 专家评审记录（含 `status`: APPROVED/REJECTED/CANCELLED — 暂无 CANCELLED 实际产生，因 PENDING 不可撤回；保留字段以备未来）、评审批注、`reviewer_id`（允许自审）
 - **AuditLog**: 全局操作日志与合规审计（记录：pin/re-pin、软删除/恢复、ARCHIVED↔ACTIVE、APPROVED→DRAFT 撤销、状态流转）
@@ -219,7 +277,36 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
-### 2.4 Question & QuestionVersion (认证考题与版本快照)
+### 2.4 Task — Writer↔Reviewer Assignment (Q1–Q5, ADR-0007)
+
+Structured top-down assignment created by **REVIEWER/ADMIN** (Q1 d) for a **single WRITER** target. Sanest defaults per grill Ledger:
+
+- **Task**: `id`, `title`, `description`, `created_by` (REVIEWER/ADMIN `id`), `assignee_id` (WRITER `id`, exactly 1 per Task, Q1 d), `status` (`IN_PROGRESS` | `IN_REVIEW` | `COMPLETED`), `required_count` (1..N, cap ≤N, can be less but no more, Q3), `current_count` (derived), `subject`/`category` (optional), `type_breakdown` (`{ SINGLE_CHOICE, MULTIPLE_CHOICE, ESSAY }` counts, validated on task question create, Q2 b), `difficulty_range` (`[min,max]` 1-5, validated, Q2 b), `target_exam_folder_id` (optional, for curation), `deadline` (ISO date, required on create & on reopen), `revision_deadline` (deadline for REVISE resubmission, set on review completion), `created_at`, `updated_at`
+- **Task status machine:**
+
+```
+  REVIEWER/ADMIN creates → IN_PROGRESS (writer creates Questions via Task)
+           │  (writer POST /api/tasks/:id/questions, validates type/difficulty/subject, exact cap ≤ required_count)
+           │  writer POST /api/tasks/:id/submit — bulk DRAFT→PENDING_REVIEW + Task IN_PROGRESS→IN_REVIEW, writer read-only on task questions (PUT/DELETE 403, GET allowed)
+           ▼
+       IN_REVIEW (reviewer batch review: per-question ACCEPT/REJECT/REVISE)
+           │  reviewer POST /api/tasks/:id/review { verdicts[], newDeadline? }
+           ├─ All ACCEPT ────────────→ COMPLETED (terminal, read-only both, REJECT terminal too)
+           ├─ Any REVISE (≥1) ───────→ IN_PROGRESS reopened + **newDeadline required** (REVISEd questions → DRAFT re-editable, ACCEPT/REJECT stay locked)
+           └─ REJECT-only (no REVISE) → COMPLETED (REJECT is terminal REJECTED, no reopen, §Q5 1a/2 close)
+```
+
+- **Invariants (sanest defaults):**
+  - **Strict Task-only for WRITER while assigned** (Q3 a): any WRITER with an `IN_PROGRESS` Task has loose `POST /api/questions` blocked (403); creation must be `POST /api/tasks/:id/questions` (auto `author_id = assignee_id`, type/difficulty/subject breakdown validated, cap ≤ `required_count`).
+  - **Cap ≤ required_count** (Q3 b less but not more): writer may create `1..required_count`, `required_count+1` → `403 count exceeded`. Submit enabled when `1 ≤ current_count ≤ required_count`.
+  - **Submit read-only** (Q4 a/b): bulk `DRAFT→PENDING_REVIEW` + `IN_REVIEW`; writer `PUT/DELETE` on task's questions → 403, `GET` allowed.
+  - **Batch review guards:** reviewer batch verdicts per Task question; `REJECT` terminal `PENDING→REJECTED` (no re-edit); `REVISE` terminal but → `DRAFT` re-editable (§Q5 1a); mixed batches: `ACCEPT/REJECT` stay locked after reopen.
+
+- **Deadline:** initial `deadline` required; on REVISE reopen `newDeadline` required; overdue shown as `isOverdue` derived (`deadline < now && status IN_PROGRESS|IN_REVIEW`).
+
+- **Visibility (matches §2.1 tightening):** WRITER sees only own Tasks + own Questions; REVIEWER/ADMIN see all Tasks; VIEWER sees none.
+
+### 2.5 Question & QuestionVersion (认证考题与版本快照)
 - **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
@@ -242,7 +329,7 @@ DRAFT ──submit──► PENDING_REVIEW ──approve──► APPROVED
 ```
 - 并发：基于 `version_number`/`updated_at` 乐观锁，冲突返回 409 Conflict。
 
-### 2.5 Tag & ReviewRecord & AuditLog
+### 2.6 Tag & ReviewRecord & AuditLog
 - **Tag**: 认证考点标签 (e.g. *High Availability*, *Zero Trust Architecture*, *OAuth 2.0 / OIDC*, *Risk Mitigation*, *Kubernetes CNI*)
 - **ReviewRecord**: 专家评审记录（含 `status`: APPROVED/REJECTED/CANCELLED — 暂无 CANCELLED 实际产生，因 PENDING 不可撤回；保留字段以备未来）、评审批注、`reviewer_id`（允许自审）
 - **AuditLog**: 全局操作日志与合规审计（记录：pin/re-pin、软删除/恢复、ARCHIVED↔ACTIVE、APPROVED→DRAFT 撤销、状态流转）

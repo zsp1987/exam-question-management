@@ -81,6 +81,29 @@ function initSchema() {
       FOREIGN KEY (pinned_version_id) REFERENCES question_versions(id)
     );
 
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      created_by TEXT NOT NULL,
+      assignee_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'IN_PROGRESS' CHECK (status IN ('IN_PROGRESS','IN_REVIEW','COMPLETED')),
+      required_count INTEGER NOT NULL,
+      subject TEXT,
+      category TEXT,
+      type_breakdown TEXT, -- JSON {SINGLE_CHOICE: n, MULTIPLE_CHOICE: n, ESSAY: n} optional
+      difficulty_min INTEGER,
+      difficulty_max INTEGER,
+      target_exam_folder_id TEXT,
+      deadline TEXT NOT NULL,
+      revision_deadline TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id),
+      FOREIGN KEY (assignee_id) REFERENCES users(id),
+      FOREIGN KEY (target_exam_folder_id) REFERENCES exams(id)
+    );
+
     CREATE TABLE IF NOT EXISTS question_versions (
       id TEXT PRIMARY KEY,
       question_id TEXT NOT NULL,
@@ -129,6 +152,19 @@ function initSchema() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS task_reviews (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      reviewer_id TEXT NOT NULL,
+      question_id TEXT NOT NULL,
+      verdict TEXT NOT NULL CHECK (verdict IN ('ACCEPT','REJECT','REVISE')),
+      comment TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+      FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
+      FOREIGN KEY (reviewer_id) REFERENCES users(id)
+    );
+
     CREATE TABLE IF NOT EXISTS kpi_daily (
       id TEXT PRIMARY KEY,
       date TEXT NOT NULL,
@@ -158,6 +194,7 @@ function initSchema() {
   migrate('questions', 'deleted_at', 'deleted_at DATETIME');
   migrate('exam_questions', 'pinned_version_id', 'pinned_version_id TEXT');
   migrate('question_versions', 'katex_source', 'katex_source TEXT');
+  migrate('questions', 'task_id', 'task_id TEXT');
 
   // Backfill pinned_version_id for existing rows (current_version_id where APPROVED)
   try {
@@ -189,6 +226,9 @@ function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_questions_deleted_at ON questions(deleted_at);
     CREATE INDEX IF NOT EXISTS idx_questions_author_id ON questions(author_id);
     CREATE INDEX IF NOT EXISTS idx_question_versions_qid_vnum ON question_versions(question_id, version_number);
+    CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee_id, status);
+    CREATE INDEX IF NOT EXISTS idx_questions_task ON questions(task_id);
+    CREATE INDEX IF NOT EXISTS idx_task_reviews_task ON task_reviews(task_id);
   `);
 }
 

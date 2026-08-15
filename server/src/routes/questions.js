@@ -174,6 +174,11 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // 3. Create Question (WRITER, REVIEWER, ADMIN)
 router.post('/', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+  // TASK_ONLY: writer with IN_PROGRESS task must use POST /api/tasks/:id/questions
+  if((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && req.user.role !== 'ADMIN' && req.user.role !== 'REVIEWER'){
+    const inProg=db.prepare("SELECT id FROM tasks WHERE assignee_id=? AND status='IN_PROGRESS'").get(req.user.id);
+    if(inProg) return res.status(403).json({ error: 'You have an IN_PROGRESS task — create questions only via that task' });
+  }
   const {
     type = 'SINGLE_CHOICE', difficulty = 3, subject = 'AWS Certified Solutions Architect',
     title, stem_rich_text, options = [], standard_answer_rich_text = '', explanation_rich_text = '',
@@ -239,13 +244,23 @@ router.put('/:id', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWE
     return res.status(403).json({ error: 'REVIEWER 仅可编辑本人创建的题目' });
   }
 
+  // Task read-only while IN_REVIEW
+  if(question.task_id){
+    const t=db.prepare('SELECT status FROM tasks WHERE id=?').get(question.task_id);
+    if(t && t.status==='IN_REVIEW') return res.status(403).json({ error: 'Question locked: task is IN_REVIEW' });
+    if(t && t.status==='COMPLETED') return res.status(403).json({ error: 'Question locked: task completed' });
+  }
   // State guards per grill Q8/Q9/Q1
   if (question.status === 'PENDING_REVIEW') {
     return res.status(400).json({ error: '题目正在审核中，须等待审核完成（通过/驳回）后方可编辑' });
   }
   if (question.status === 'REJECTED') {
-    // REJECTED -> DRAFT is allowed (reopen flow), goes to DRAFT via update. That's the only path.
-    // Allow - it will transition to DRAFT below.
+    if(question.task_id){
+      const tt=db.prepare('SELECT status FROM tasks WHERE id=?').get(question.task_id);
+      if(tt && tt.status==='COMPLETED') return res.status(403).json({ error: 'Rejected question is terminal (task completed)' });
+      const vr=db.prepare('SELECT verdict FROM task_reviews WHERE task_id=? AND question_id=? ORDER BY created_at DESC LIMIT 1').get(question.task_id, question.id);
+      if(vr && vr.verdict==='REJECT') return res.status(403).json({ error: 'Rejected question cannot be re-edited' });
+    }
   }
   if (!title || !title.trim()) return res.status(400).json({ error: '考题标题不能为空' });
   if (!stem_rich_text || !stem_rich_text.trim()) return res.status(400).json({ error: '考题题干内容不能为空' });
@@ -391,6 +406,11 @@ router.delete('/:id', authenticateToken, requireRole(['WRITER', 'TEACHER', 'ADMI
   const question = db.prepare('SELECT * FROM questions WHERE id = ? AND deleted_at IS NULL').get(id);
   if (!question) return res.status(404).json({ error: '考题不存在或已删除' });
   if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && question.author_id !== req.user.id) return res.status(403).json({ error: '只能删除本人创建的考题' });
+  // Task lock: cannot delete while IN_REVIEW/COMPLETED
+  if(question.task_id){
+    const tt=db.prepare('SELECT status FROM tasks WHERE id=?').get(question.task_id);
+    if(tt && (tt.status==='IN_REVIEW' || tt.status==='COMPLETED')) return res.status(403).json({ error: 'Question locked: task is ' + tt.status });
+  }
   // Block if pinned in any exam
   const pinned = db.prepare('SELECT COUNT(*) as c FROM exam_questions WHERE question_id = ?').get(id).c;
   if (pinned > 0) return res.status(400).json({ error: `该考题已被 ${pinned} 个认证考试引用，请先从考试中移除后再删除` });

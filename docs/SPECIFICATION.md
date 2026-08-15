@@ -169,7 +169,25 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
   - 重现性：best-effort（不承诺 bit-identical）。
   - 难度：REVIEWER 主观 1-5，仅报表用途，不参与组卷约束。
 
-### 3.6 删除与保留
+### 3.6 Task System — Writer↔Reviewer Assignment (Grill Q1–Q5, ADR-0007)
+
+**Ownership:** REVIEWER/ADMIN creates `Task` for single WRITER target (Q1 d). WRITER cannot self-create. `Task` carries `title/description + assignee + required_count (1..N, cap ≤N, less allowed, more blocked, Q3) + deadline (required, new deadline on REVISE reopen) + subject/category + type_breakdown {SINGLE, MULTIPLE, ESSAY} + difficulty_range + target_exam_folder_id?`.
+
+**Creation constraints (sanest defaults):**
+- Validated on `Task` create `/api/tasks` (REVIEWER/ADMIN only).
+- While a WRITER has an `IN_PROGRESS` Task, loose `POST /api/questions` → `403`; must use `POST /api/tasks/:id/questions` (auto `author = assignee`, validates subject/type_breakdown/difficulty, cap ≤ required_count).
+
+**Submit (Q4 a/b):** `POST /api/tasks/:id/submit` by WRITER assignee only: bulk `Task IN_PROGRESS→IN_REVIEW` + linked `Question DRAFT→PENDING_REVIEW` (atomic). Writer then read-only on task questions (`PUT/DELETE` 403). `GET` allowed.
+
+**Batch Review (Q5 1a/2):** `POST /api/tasks/:id/review` by REVIEWER/ADMIN with body `verdicts: [{questionId, verdict: ACCEPT|REJECT|REVISE, comment}]` + `newDeadline?`.
+- `ACCEPT` → `PENDING→APPROVED`
+- `REJECT` (terminal) → `PENDING→REJECTED` (no re-edit, §Q5 1a)
+- `REVISE` (request changes) → `PENDING→DRAFT` re-editable (§Q5 1a)
+- Mixed: after batch, if any `REVISE` → Task reopens `IN_REVIEW→IN_PROGRESS` **newDeadline required**, only `REVISE`d regain edit; `ACCEPT/REJECT` stay locked. All ACCEPT or ACCEPT+REJECT (no REVISE) → `COMPLETED`.
+
+**Polling/view:** `GET /api/tasks`, `GET /api/tasks/:id` (writer own-only, reviewer/admin all, viewer none). `GET /api/tasks/:id/questions` lists task's questions.
+
+### 3.7 删除与保留
 - 软删除 `questions.deleted_at`；被 pin 的 Question 禁止软删除（须先 unpin）；`QuestionVersion` 永不删除；恢复仅 ADMIN。
 
 ### 3.7 国际化

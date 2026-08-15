@@ -16,6 +16,8 @@ import AdminConsolePage from "./pages/AdminConsolePage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import Breadcrumb from "./components/Breadcrumb";
+import TasksPage from "./pages/TasksPage";
+import TaskDetailPage from "./pages/TaskDetailPage";
 
 function MainApp() {
 	const { user, loading } = useAuth();
@@ -26,6 +28,7 @@ function MainApp() {
 	const [editingQuestionId, setEditingQuestionId] = useState(null);
 	const [detailQuestionId, setDetailQuestionId] = useState(null);
 	const [selectedExamId, setSelectedExamId] = useState(null);
+	const [selectedTaskId, setSelectedTaskId] = useState(null);
 
 	// Enforce nav guards: redirect writer/viewer if they land on forbidden tab (direct URL / stale state)
 	// Must be above early returns to keep Rules of Hooks stable (hook order must not change between renders).
@@ -35,10 +38,25 @@ function MainApp() {
 		const pw = role === "WRITER" || role === "TEACHER";
 		const isPureWriter = pw && role !== "ADMIN" && role !== "REVIEWER";
 		const isViewer = role === "VIEWER";
-		const writerAllowed = new Set(["questions", "create-question", "question-detail", "profile"]);
-		const viewerAllowed = new Set(["exam-folders", "exam-folder-detail", "questions", "question-detail", "profile"]);
-		if (isPureWriter && !writerAllowed.has(currentTab)) setCurrentTab("questions");
-		if (isViewer && !viewerAllowed.has(currentTab)) setCurrentTab("exam-folders");
+		const writerAllowed = new Set([
+			"questions",
+			"create-question",
+			"question-detail",
+			"profile",
+			"tasks",
+			"task-detail",
+		]);
+		const viewerAllowed = new Set([
+			"exam-folders",
+			"exam-folder-detail",
+			"questions",
+			"question-detail",
+			"profile",
+		]);
+		if (isPureWriter && !writerAllowed.has(currentTab))
+			setCurrentTab("questions");
+		if (isViewer && !viewerAllowed.has(currentTab))
+			setCurrentTab("exam-folders");
 	}, [user, currentTab]);
 
 	// Default tab per role from JWT on first load (before user hydration, still gates initial view)
@@ -48,7 +66,10 @@ function MainApp() {
 			const tok = localStorage.getItem("eqms_token");
 			if (!tok) return;
 			const payload = JSON.parse(atob(tok.split(".")[1]));
-			if ((payload.role === "WRITER" || payload.role === "TEACHER") && currentTab === "exam-folders") {
+			if (
+				(payload.role === "WRITER" || payload.role === "TEACHER") &&
+				currentTab === "exam-folders"
+			) {
 				setCurrentTab("questions");
 			}
 		} catch {}
@@ -69,7 +90,6 @@ function MainApp() {
 		return <LoginPage />;
 	}
 
-
 	const handleNavigate = (tab) => {
 		// Guard: block writer from exam-library/reports/reviews/admin, viewer from create/reviews/reports/admin
 		if (user) {
@@ -79,13 +99,33 @@ function MainApp() {
 			const isAdmin = role === "ADMIN";
 			const isRev = role === "REVIEWER" || isAdmin;
 			const isPureWriter = isPw && !isRev;
-			if (isPureWriter && !["questions", "create-question", "question-detail", "profile"].includes(tab)) return;
-			if (isV && !["exam-folders", "exam-folder-detail", "questions", "question-detail", "profile"].includes(tab)) return;
+			if (
+				isPureWriter &&
+				![
+					"questions",
+					"create-question",
+					"question-detail",
+					"profile",
+				].includes(tab)
+			)
+				return;
+			if (
+				isV &&
+				![
+					"exam-folders",
+					"exam-folder-detail",
+					"questions",
+					"question-detail",
+					"profile",
+				].includes(tab)
+			)
+				return;
 		}
 		setCurrentTab(tab);
 		setEditingQuestionId(null);
 		setDetailQuestionId(null);
 		setSelectedExamId(null);
+		setSelectedTaskId(null);
 	};
 
 	const handleEditQuestion = (question) => {
@@ -96,6 +136,11 @@ function MainApp() {
 	const handleViewQuestion = (question) => {
 		setDetailQuestionId(question.id);
 		setCurrentTab("question-detail");
+	};
+
+	const handleSelectTask = (task) => {
+		setSelectedTaskId(task.id);
+		setCurrentTab("task-detail");
 	};
 
 	const handleSelectExam = (exam) => {
@@ -166,6 +211,12 @@ function MainApp() {
 
 			case "admin-audit":
 				return <AdminConsolePage initialTab="audit" />;
+
+			case "tasks":
+				return <TasksPage onViewTask={handleSelectTask} />;
+
+			case "task-detail":
+				return <TaskDetailPage taskId={selectedTaskId} onBack={() => handleNavigate("tasks")} onViewQuestion={handleViewQuestion} />;
 
 			case "profile":
 				return <ProfilePage />;

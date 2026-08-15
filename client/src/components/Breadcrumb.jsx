@@ -3,6 +3,8 @@ import { useI18n } from "../context/I18nContext";
 
 const NAV_LABELS = {
   "exam-folders": (t) => t("navExamFolders"),
+  tasks: () => "Tasks",
+  "task-detail": () => "Detail",
   "exam-folder-detail": () => "Detail",
   questions: (t) => t("navQuestions"),
   "create-question": (t) => t("navCreateQuestion"),
@@ -18,6 +20,7 @@ const NAV_LABELS = {
 
 const PARENT = {
   "exam-folder-detail": "exam-folders",
+  "task-detail": "tasks",
   "create-question": "questions",
   "question-detail": "questions",
   "admin-users": "admin-console",

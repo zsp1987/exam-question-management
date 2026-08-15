@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
 	FolderCheck,
+	ClipboardList,
 	Layers,
 	PlusCircle,
 	CheckSquare,
@@ -16,8 +17,9 @@ export default function Sidebar({ currentTab, onNavigate }) {
 	const { user, isAdmin, isReviewer, isTeacher } = useAuth();
 	const { t } = useI18n();
 	const [pendingCount, setPendingCount] = useState(0);
-	const isViewer = user?.role === 'VIEWER';
-	const isPureWriter = (user?.role === 'WRITER' || user?.role === 'TEACHER') && !isReviewer; // writer who is not also reviewer/admin
+	const isViewer = user?.role === "VIEWER";
+	const isPureWriter =
+		(user?.role === "WRITER" || user?.role === "TEACHER") && !isReviewer; // writer who is not also reviewer/admin
 
 	useEffect(() => {
 		async function fetchPendingCount() {
@@ -35,9 +37,17 @@ export default function Sidebar({ currentTab, onNavigate }) {
 
 	const navItems = [
 		{
+			id: "tasks",
+			label: "Tasks",
+			icon: ClipboardList,
+			show: !isViewer,
+			desc: "Writer/Reviewer tasks",
+		},
+		{
 			id: "exam-folders",
 			label: t("navExamFolders"),
 			icon: FolderCheck,
+	ClipboardList,
 			show: !isPureWriter,
 			desc: t("navExamFoldersDesc"),
 		},
