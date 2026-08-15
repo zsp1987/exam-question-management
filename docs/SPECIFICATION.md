@@ -17,11 +17,11 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
 |---|---|---|
 | **ADMIN** | 认证体系总监 / 系统管理员 | 全局科目/考纲/全量题库/用户权限/安全审计；唯一可撤销 APPROVED→DRAFT、恢复软删除、重激活 ARCHIVED。 |
 | **REVIEWER** | 认证评审专家 / 主考官 | 全局评审（不按领域限域）、通过/驳回、设置 `minimum_total_weight` 与难度终审（1-5 主观）。不可撤销 APPROVED。 |
-| **TEACHER** | 认证命题专家 (SME) | 创建/编辑（本人 DRAFT/REJECTED→DRAFT）、LaTeX/表格排版、提交送审、归档已批准题目入考试集。 |
+| **WRITER** | 认证命题专家 (SME) | 创建/编辑（本人 DRAFT/REJECTED→DRAFT）、LaTeX/表格排版、提交送审、归档已批准题目入考试集。 |
 | **VIEWER** | 认证稽核员 / 考生助教 | 只读**仅 APPROVED** 浏览、解析查看、试卷导出与报表（KPI 仅 APPROVED）。 |
 
 ### 2.2 权限矩阵（Enforceable）
-| Action | ADMIN | REVIEWER | TEACHER (author) | TEACHER (non-author) | VIEWER |
+| Action | ADMIN | REVIEWER | WRITER (author) | WRITER (non-author) | VIEWER |
 |---|---|---|---|---|---|
 | Create Question | Y | N | Y | Y | N |
 | Edit DRAFT | Y | N | own-only Y | N | N |
@@ -81,11 +81,11 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
 |---|---|---|
 | **ADMIN** | 认证体系总监 / 系统管理员 | 全局科目/考纲/全量题库/用户权限/安全审计；唯一可撤销 APPROVED→DRAFT、恢复软删除、重激活 ARCHIVED。 |
 | **REVIEWER** | 认证评审专家 / 主考官 | 全局评审（不按领域限域）、通过/驳回、设置 `minimum_total_weight` 与难度终审（1-5 主观）。不可撤销 APPROVED。 |
-| **TEACHER** | 认证命题专家 (SME) | 创建/编辑（本人 DRAFT/REJECTED→DRAFT）、LaTeX/表格排版、提交送审、归档已批准题目入考试集。 |
+| **WRITER** | 认证命题专家 (SME) | 创建/编辑（本人 DRAFT/REJECTED→DRAFT）、LaTeX/表格排版、提交送审、归档已批准题目入考试集。 |
 | **VIEWER** | 认证稽核员 / 考生助教 | 只读**仅 APPROVED** 浏览、解析查看、试卷导出与报表（KPI 仅 APPROVED）。 |
 
 ### 2.2 权限矩阵（Enforceable）
-| Action | ADMIN | REVIEWER | TEACHER (author) | TEACHER (non-author) | VIEWER |
+| Action | ADMIN | REVIEWER | WRITER (author) | WRITER (non-author) | VIEWER |
 |---|---|---|---|---|---|
 | Create Question | Y | N | Y | Y | N |
 | Edit DRAFT | Y | N | own-only Y | N | N |
@@ -124,7 +124,7 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
 - **粘贴/拖拽（Q7 a Strict）**：剥离 style/class、扁平嵌套 table、剥离 colspan/rowspan>1、超 20×20 截断并 toast、超 50KB 拒绝、非法 data-latex 拒绝。
 - **所见即所得**：编辑即渲染，无需分屏预览切换（保留预览仅用于导出前确认，可选）。
 - **安全**：写入 + 渲染双重 sanitize，allow-list 含 `span.katex-inline[data-latex]` / `div.katex-block[data-latex]`，data-latex KaTeX 校验，见 CONTEXT §3；`<script>/<iframe>/<style>` 与 `on*` 一律剥离。
-- **图片**：jpg/png/webp，≤5MB，TEACHER/ADMIN/REVIEWER 可上传；磁盘 `uploads/` + URL 引用；SVG 禁止；导出捆绑。
+- **图片**：jpg/png/webp，≤5MB，WRITER/ADMIN/REVIEWER 可上传；磁盘 `uploads/` + URL 引用；SVG 禁止；导出捆绑。
 
 ### 3.3 审核工作流 (Review Workflow)
 - 状态机（见 CONTEXT §2.4）：
@@ -155,7 +155,7 @@ EQMS 是专为**专业资格与IT认证考试**（如 AWS SAP-C02、CISSP、PMP-
 - **KPI**：总题量、待审量、通过率、难度矩阵（1-5）、题型占比、领域分布。
   - VIEWER：仅统计 APPROVED。
   - ADMIN/REVIEWER：统计全量。
-  - TEACHER：APPROVED 全量 + 本人 DRAFT/PENDING/REJECTED。
+  - WRITER：APPROVED 全量 + 本人 DRAFT/PENDING/REJECTED。
 - **实现**：复合索引 `(status, type, difficulty, category)` + `(exam_id, pinned_version_id)` + 夜间物化表 `kpi_daily`。
 - **导出**：
   - 产物：Markdown / JSON，**仅含题干**（不含答案/解析，student-facing）；图片以 `uploads/` 同级目录捆绑 + `manifest.json` 清单。

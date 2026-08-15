@@ -8,7 +8,7 @@ const { authenticateToken } = require('../middleware/auth');
 router.get('/overview', authenticateToken, (req, res) => {
   try {
     const isViewer = req.user && req.user.role === 'VIEWER';
-    const isTeacher = req.user && req.user.role === 'TEACHER';
+    const isTeacher = req.user && (req.user.role === 'WRITER' || req.user.role === 'TEACHER');
     let scopeClause = '';
     let scopeParams = [];
     if (isViewer) {
@@ -102,7 +102,7 @@ router.get('/export', authenticateToken, (req, res) => {
   const params = [];
   if (subject) { where.push('q.subject = ?'); params.push(subject); }
   if (effectiveStatus && effectiveStatus !== 'ALL') { where.push('q.status = ?'); params.push(effectiveStatus); }
-  if (req.user.role === 'TEACHER') {
+  if (req.user.role === 'WRITER' || req.user.role === 'TEACHER') {
     // teacher sees own drafts + all APPROVED already handled by status filter; if status is DRAFT we scope to own
     if (effectiveStatus !== 'APPROVED' && effectiveStatus !== 'ALL') {
       where.push('q.author_id = ?'); params.push(req.user.id);

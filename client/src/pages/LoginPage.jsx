@@ -81,7 +81,7 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin / teacher / reviewer / viewer"
+                  placeholder="admin / writer / reviewer / viewer"
                   className="w-full pl-9 pr-3 py-2.5 bg-slate-900/60 border border-white/15 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-400"
                 />
               </div>

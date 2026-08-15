@@ -42,8 +42,8 @@ router.get('/subjects', (req, res) => {
   res.json({ subjects: subjects.filter(Boolean) });
 });
 
-// Create tag (TEACHER, REVIEWER, ADMIN)
-router.post('/', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+// Create tag (WRITER, REVIEWER, ADMIN)
+router.post('/', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { name, category = '知识点', color = '#3b82f6' } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ error: '标签名称不能为空' });

@@ -34,7 +34,7 @@ function visibilityClause(user) {
   if (user.role === 'ADMIN' || user.role === 'REVIEWER') {
     return { clause: 'q.deleted_at IS NULL', params: [] };
   }
-  if (user.role === 'TEACHER') {
+  if ((user.role === 'WRITER' || user.role === 'TEACHER')) {
     return { clause: "(q.deleted_at IS NULL AND (q.status = 'APPROVED' OR q.author_id = ?))", params: [user.id] };
   }
   // VIEWER
@@ -76,7 +76,7 @@ router.get('/', authenticateToken, (req, res) => {
       if (req.user.role === 'VIEWER' && status !== 'APPROVED') {
         return res.status(403).json({ error: 'VIEWER 仅可查看已批准题目' });
       }
-      if (req.user.role === 'TEACHER' && ['DRAFT','PENDING_REVIEW','REJECTED'].includes(status)) {
+      if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && ['DRAFT','PENDING_REVIEW','REJECTED'].includes(status)) {
         // Teacher can only list own drafts - additional author check is handled via visibilityClause already
       }
       whereClauses.push('q.status = ?'); params.push(status);
@@ -154,7 +154,7 @@ router.get('/:id', authenticateToken, (req, res) => {
   if (req.user.role === 'VIEWER' && row.status !== 'APPROVED') {
     return res.status(403).json({ error: 'VIEWER 仅可查看已批准题目' });
   }
-  if (req.user.role === 'TEACHER' && row.author_id !== req.user.id && row.status !== 'APPROVED') {
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && row.author_id !== req.user.id && row.status !== 'APPROVED') {
     return res.status(403).json({ error: '仅可查看本人草稿或已批准题目' });
   }
 
@@ -167,8 +167,8 @@ router.get('/:id', authenticateToken, (req, res) => {
   res.json({ question, reviewHistory });
 });
 
-// 3. Create Question (TEACHER, REVIEWER, ADMIN)
-router.post('/', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+// 3. Create Question (WRITER, REVIEWER, ADMIN)
+router.post('/', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const {
     type = 'SINGLE_CHOICE', difficulty = 3, subject = 'AWS Certified Solutions Architect',
     title, stem_rich_text, options = [], standard_answer_rich_text = '', explanation_rich_text = '',
@@ -215,7 +215,7 @@ router.post('/', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']
 });
 
 // 4. Update Question (Creates a NEW Version Snapshot)
-router.put('/:id', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.put('/:id', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id } = req.params;
   const {
     title, stem_rich_text, options = [], standard_answer_rich_text = '', explanation_rich_text = '',
@@ -226,8 +226,8 @@ router.put('/:id', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN
   const question = db.prepare('SELECT * FROM questions WHERE id = ? AND deleted_at IS NULL').get(id);
   if (!question) return res.status(404).json({ error: '考题不存在' });
 
-  // RBAC: TEACHER can only edit own
-  if (req.user.role === 'TEACHER' && question.author_id !== req.user.id) {
+  // RBAC: WRITER can only edit own
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && question.author_id !== req.user.id) {
     return res.status(403).json({ error: '只能编辑本人创建的考题' });
   }
   if (req.user.role === 'REVIEWER' && question.author_id !== req.user.id) {
@@ -312,12 +312,12 @@ router.put('/:id', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN
 });
 
 // 5. Submit Question for Review
-router.post('/:id/submit-review', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.post('/:id/submit-review', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id } = req.params;
   const { comment = '申请审核' } = req.body;
   const question = db.prepare('SELECT * FROM questions WHERE id = ? AND deleted_at IS NULL').get(id);
   if (!question) return res.status(404).json({ error: '考题不存在' });
-  if (req.user.role === 'TEACHER' && question.author_id !== req.user.id) return res.status(403).json({ error: '只能提交本人创建的考题送审' });
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && question.author_id !== req.user.id) return res.status(403).json({ error: '只能提交本人创建的考题送审' });
   if (question.status === 'APPROVED') return res.status(400).json({ error: '该考题已通过审核，如需修改请先编辑保存新版本' });
   if (question.status === 'PENDING_REVIEW') return res.status(400).json({ error: '该考题已在审核中，请等待审核结果' });
   if (question.status === 'REJECTED') return res.status(400).json({ error: '已驳回题目请先编辑重开为 DRAFT 后再提交' });
@@ -352,11 +352,11 @@ router.get('/:id/versions/:versionId', authenticateToken, (req, res) => {
 });
 
 // 8. Rollback to a specific historic version
-router.post('/:id/rollback/:versionId', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.post('/:id/rollback/:versionId', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id, versionId } = req.params;
   const question = db.prepare('SELECT * FROM questions WHERE id = ? AND deleted_at IS NULL').get(id);
   if (!question) return res.status(404).json({ error: '考题不存在' });
-  if (req.user.role === 'TEACHER' && question.author_id !== req.user.id) return res.status(403).json({ error: '只能回滚本人创建的考题版本' });
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && question.author_id !== req.user.id) return res.status(403).json({ error: '只能回滚本人创建的考题版本' });
   if (question.status === 'PENDING_REVIEW') return res.status(400).json({ error: '审核中的题目不可回滚' });
   const targetVersion = db.prepare('SELECT * FROM question_versions WHERE question_id = ? AND id = ?').get(id, versionId);
   if (!targetVersion) return res.status(404).json({ error: '目标回滚版本不存在' });
@@ -381,11 +381,11 @@ router.post('/:id/rollback/:versionId', authenticateToken, requireRole(['TEACHER
 });
 
 // 9. Soft Delete Question (Q3)
-router.delete('/:id', authenticateToken, requireRole(['TEACHER', 'ADMIN']), (req, res) => {
+router.delete('/:id', authenticateToken, requireRole(['WRITER', 'TEACHER', 'ADMIN']), (req, res) => {
   const { id } = req.params;
   const question = db.prepare('SELECT * FROM questions WHERE id = ? AND deleted_at IS NULL').get(id);
   if (!question) return res.status(404).json({ error: '考题不存在或已删除' });
-  if (req.user.role === 'TEACHER' && question.author_id !== req.user.id) return res.status(403).json({ error: '只能删除本人创建的考题' });
+  if ((req.user.role === 'WRITER' || req.user.role === 'TEACHER') && question.author_id !== req.user.id) return res.status(403).json({ error: '只能删除本人创建的考题' });
   // Block if pinned in any exam
   const pinned = db.prepare('SELECT COUNT(*) as c FROM exam_questions WHERE question_id = ?').get(id).c;
   if (pinned > 0) return res.status(400).json({ error: `该考题已被 ${pinned} 个认证考试引用，请先从考试中移除后再删除` });

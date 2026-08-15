@@ -186,7 +186,7 @@ async function runSuite() {
     const teacherLogin = await request('POST', '/auth/login', { username: 'teacher', password: '123456' });
     const teacherToken = teacherLogin.body?.token;
     assert(Boolean(teacherToken), 'Teacher login returns valid JWT token');
-    assertEqual(teacherLogin.body?.user?.role, 'TEACHER', 'Teacher role is TEACHER');
+    assertEqual(teacherLogin.body?.user?.role, 'WRITER', 'Teacher role is WRITER');
 
     const reviewerLogin = await request('POST', '/auth/login', { username: 'reviewer', password: '123456' });
     const reviewerToken = reviewerLogin.body?.token;
@@ -219,9 +219,9 @@ async function runSuite() {
     const viewerCreateQ = await request('POST', '/questions', { title: 'Test Q', stem_rich_text: 'Stem' }, viewerToken);
     assertEqual(viewerCreateQ.status, 403, 'VIEWER role forbidden from creating questions (403)');
 
-    // 1.6 RBAC: TEACHER cannot access Admin endpoints
+    // 1.6 RBAC: WRITER cannot access Admin endpoints
     const teacherAdminAccess = await request('GET', '/admin/users', null, teacherToken);
-    assertEqual(teacherAdminAccess.status, 403, 'TEACHER role forbidden from accessing /api/admin/users (403)');
+    assertEqual(teacherAdminAccess.status, 403, 'WRITER role forbidden from accessing /api/admin/users (403)');
 
     // 1.7 RBAC: REVIEWER cannot access Admin endpoints
     const reviewerAdminAccess = await request('GET', '/admin/users', null, reviewerToken);
@@ -576,7 +576,7 @@ async function runSuite() {
       name: 'Dr. Automated Tester',
       email: `${testUsername}@cert-eqms.com`,
       password: 'password123',
-      role: 'TEACHER',
+      role: 'WRITER',
     }, adminToken);
     assertEqual(createUserRes.status, 201, 'Admin created new user (201)');
     const createdUser = createUserRes.body?.user;

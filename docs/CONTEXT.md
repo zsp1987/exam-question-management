@@ -10,12 +10,12 @@ EQMS 是专为**专业资格与技术认证考试**（如 AWS/GCP 云架构师�
 ### 2.1 User & Role (用户与角色)
 - **ADMIN (认证体系总监 / 系统管理员)**: 认证科目创建/激活/归档、考纲管理、全量题库管理、用户权限、安全审计、唯一可撤销已批准题目（APPROVED → DRAFT）与恢复软删除。
 - **REVIEWER (认证评审专家 / 主考官)**: 全局评审（不按专业领域限域）、审核待审认证考题、验证考点契合度、批注修改建议、通过或驳回入库、设置 `score_weight` 最小总量门槛与题目难度（1-5 主观判定）。不可撤销已批准题目。
-- **TEACHER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
+- **WRITER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
 - **VIEWER (认证稽核员 / 考生助教)**: 只读浏览**仅 APPROVED** 题库、查看考题解析、试卷导出与报表分析（KPI 亦仅统计 APPROVED）。
 
 **可见性规则（Visibility）**
 - ADMIN/REVIEWER：可见全部状态。
-- TEACHER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
+- WRITER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
 - VIEWER：仅可见 APPROVED（含导出与报表）。
 
 **自审策略**：允许 `author_id == reviewer_id`（自审不被禁止），有意为之（见 ADR-0004）。
@@ -52,7 +52,7 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
 ### 2.4 Question & QuestionVersion (认证考题与版本快照)
-- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，TEACHER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
+- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
   - 每次编辑生成新 `QuestionVersion`（不可篡改，永不 GC；即使 Question 软删除也保留）。
@@ -96,12 +96,12 @@ EQMS 是专为**专业资格与技术认证考试**（如 AWS/GCP 云架构师�
 ### 2.1 User & Role (用户与角色)
 - **ADMIN (认证体系总监 / 系统管理员)**: 认证科目创建/激活/归档、考纲管理、全量题库管理、用户权限、安全审计、唯一可撤销已批准题目（APPROVED → DRAFT）与恢复软删除。
 - **REVIEWER (认证评审专家 / 主考官)**: 全局评审（不按专业领域限域）、审核待审认证考题、验证考点契合度、批注修改建议、通过或驳回入库、设置 `score_weight` 最小总量门槛与题目难度（1-5 主观判定）。不可撤销已批准题目。
-- **TEACHER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
+- **WRITER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
 - **VIEWER (认证稽核员 / 考生助教)**: 只读浏览**仅 APPROVED** 题库、查看考题解析、试卷导出与报表分析（KPI 亦仅统计 APPROVED）。
 
 **可见性规则（Visibility）**
 - ADMIN/REVIEWER：可见全部状态。
-- TEACHER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
+- WRITER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
 - VIEWER：仅可见 APPROVED（含导出与报表）。
 
 **自审策略**：允许 `author_id == reviewer_id`（自审不被禁止），有意为之（见 ADR-0004）。
@@ -138,7 +138,7 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
 ### 2.4 Question & QuestionVersion (认证考题与版本快照)
-- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，TEACHER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
+- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
   - 每次编辑生成新 `QuestionVersion`（不可篡改，永不 GC；即使 Question 软删除也保留）。
@@ -177,12 +177,12 @@ EQMS 是专为**专业资格与技术认证考试**（如 AWS/GCP 云架构师�
 ### 2.1 User & Role (用户与角色)
 - **ADMIN (认证体系总监 / 系统管理员)**: 认证科目创建/激活/归档、考纲管理、全量题库管理、用户权限、安全审计、唯一可撤销已批准题目（APPROVED → DRAFT）与恢复软删除。
 - **REVIEWER (认证评审专家 / 主考官)**: 全局评审（不按专业领域限域）、审核待审认证考题、验证考点契合度、批注修改建议、通过或驳回入库、设置 `score_weight` 最小总量门槛与题目难度（1-5 主观判定）。不可撤销已批准题目。
-- **TEACHER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
+- **WRITER / EXAM_CREATOR (认证命题专家)**: 创建与编辑认证考题（仅可编辑本人 DRAFT/REJECTED → DRAFT 新版本；PENDING 不可撤回）、LaTeX 公式与表格排版、提交送审、版本迭代、将已批准题目归档入考试集。
 - **VIEWER (认证稽核员 / 考生助教)**: 只读浏览**仅 APPROVED** 题库、查看考题解析、试卷导出与报表分析（KPI 亦仅统计 APPROVED）。
 
 **可见性规则（Visibility）**
 - ADMIN/REVIEWER：可见全部状态。
-- TEACHER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
+- WRITER：可见全部 APPROVED + 本人创建的 DRAFT/PENDING_REVIEW/REJECTED；不可见他人 DRAFT/PENDING/REJECTED。
 - VIEWER：仅可见 APPROVED（含导出与报表）。
 
 **自审策略**：允许 `author_id == reviewer_id`（自审不被禁止），有意为之（见 ADR-0004）。
@@ -219,7 +219,7 @@ DRAFT ──► ACTIVE ──► ARCHIVED
 > 关键不变量：ExamFolder 展示与导出均基于 `pinned_version_id`，不受后续 DRAFT 编辑影响；re-pin 需目标版本为 APPROVED 的显式操作 + AuditLog。
 
 ### 2.4 Question & QuestionVersion (认证考题与版本快照)
-- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，TEACHER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
+- **Question**: `id`, `current_version_id`, `type` (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `ESSAY`), `status` (`DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`), `difficulty` (1-5，WRITER 建议、REVIEWER 主观终审，见 §6), `certification_category`, `author_id`, `reviewer_id`, `deleted_at` (软删除，见 §7), `updated_at` (乐观锁)
 - **QuestionVersion**: `id`, `question_id`, `version_number` (单调递增，乐观锁), `title`, `stem_rich_text` (含场景图表/表格/LaTeX 公式， sanitized HTML), `options_json`, `standard_answer_rich_text`, `explanation_rich_text` (含考纲对应考点与知识库引用), `change_summary`, `katex_source` (原始 LaTeX，便于导出与重渲染)
 - **不变量**：
   - 每次编辑生成新 `QuestionVersion`（不可篡改，永不 GC；即使 Question 软删除也保留）。
@@ -249,7 +249,7 @@ DRAFT ──submit──► PENDING_REVIEW ──approve──► APPROVED
  类建议用 `$...$`。
 - **净化（Defense in Depth）**：写入时 + 渲染/导出时双重 sanitize；allow-list：`table/thead/tbody/tr/th/td`, `span.katex` / `span.katex-inline`(`class,data-latex`), `div.katex-block`(`class,data-latex`), `code/pre`, `ul/ol/li`, `a[href]`；`data-latex` 需 KaTeX 合法性校验（拒绝 \\input, \\def 等）；一律剥离 `<script>/<iframe>/<style>` 与 `on*`。
 - **粘贴/拖拽（Strict, Q7 a）**：粘贴时剥离所有 `style/class`（除 allow-list），扁平化嵌套 `<table>` 为文本，剥离 `colspan/rowspan>1`（拆为普通 td），超 20×20 截断至 20×20 并 toast，超 50KB 拒绝，非法 `data-latex` 拒绝；Word/Google Docs 12×15 合并表等均按此规则处理，无静默丢数据（必 toast）。
-- **图片**：仅 `jpg/png/webp`，单文件 ≤5MB，上传权限 TEACHER/ADMIN/REVIEWER；存储为 `uploads/<uuid>.*` 磁盘文件 + HTML 中 URL 引用；Base64 内嵌禁用；SVG 禁止（XSS 向量）。导出时以 `uploads/` 同级目录捆绑 + `manifest.json` 清单（见 SPEC §3.5）。
+- **图片**：仅 `jpg/png/webp`，单文件 ≤5MB，上传权限 WRITER/ADMIN/REVIEWER；存储为 `uploads/<uuid>.*` 磁盘文件 + HTML 中 URL 引用；Base64 内嵌禁用；SVG 禁止（XSS 向量）。导出时以 `uploads/` 同级目录捆绑 + `manifest.json` 清单（见 SPEC §3.5）。
 
 ## 4. Reporting & Export (报表与导出)
 - KPI：总题量/待审量/通过率/难度矩阵/题型占比/领域分布；VIEWER 仅统计 APPROVED，ADMIN/REVIEWER 统计全量。
@@ -260,7 +260,7 @@ DRAFT ──submit──► PENDING_REVIEW ──approve──► APPROVED
 - `I18nContext`，默认 `en`，`localStorage` 持久化；仅翻译 UI chrome；题目内容保持作者原文，不做内容翻译；可选 `content_locale` 标签用于过滤。
 
 ## 6. Difficulty (难度)
-- 1-5 主观分级，由 REVIEWER 终审（TEACHER 可建议）；仅用于报表难度矩阵，不参与自动组卷约束。
+- 1-5 主观分级，由 REVIEWER 终审（WRITER 可建议）；仅用于报表难度矩阵，不参与自动组卷约束。
 
 ## 7. Deletion & Retention (删除与保留)
 - 软删除：`questions.deleted_at`；从列表/搜索隐藏，pin 的版本仍可导出，历史可追溯。

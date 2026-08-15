@@ -35,8 +35,8 @@ const upload = multer({
   }
 });
 
-// POST /api/uploads/image - TEACHER/REVIEWER/ADMIN per Q16
-router.post('/image', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+// POST /api/uploads/image - WRITER/REVIEWER/ADMIN per Q16
+router.post('/image', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });

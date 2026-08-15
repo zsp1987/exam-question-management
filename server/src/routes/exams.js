@@ -141,7 +141,7 @@ router.delete('/:id', authenticateToken, requireRole(['ADMIN', 'REVIEWER']), (re
 });
 
 // 6. Add Questions to Exam Folder (Q2: pinned_version_id, Q4: block if ARCHIVED, Q12: weight enforcement)
-router.post('/:id/questions', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.post('/:id/questions', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id } = req.params;
   const { questionIds = [], domain_section = 'Core Knowledge Domain', score_weight = 1.0 } = req.body;
   const exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(id);
@@ -190,7 +190,7 @@ router.post('/:id/questions', authenticateToken, requireRole(['TEACHER', 'REVIEW
 });
 
 // 7. Remove Question from Exam Folder
-router.delete('/:id/questions/:questionId', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.delete('/:id/questions/:questionId', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id, questionId } = req.params;
   const exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(id);
   if (exam && exam.status === 'ARCHIVED') return res.status(400).json({ error: '归档考试不可移除题目' });
@@ -200,7 +200,7 @@ router.delete('/:id/questions/:questionId', authenticateToken, requireRole(['TEA
 });
 
 // 7b. Re-pin question to newer APPROVED version (Q2 explicit re-pin)
-router.post('/:id/questions/:questionId/repin', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.post('/:id/questions/:questionId/repin', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id, questionId } = req.params;
   const { pinned_version_id } = req.body;
   const exam = db.prepare('SELECT * FROM exams WHERE id = ?').get(id);
@@ -226,7 +226,7 @@ router.post('/:id/questions/:questionId/repin', authenticateToken, requireRole([
 });
 
 // 7c. Reorder exam questions (Q12 loose order)
-router.put('/:id/questions/reorder', authenticateToken, requireRole(['TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
+router.put('/:id/questions/reorder', authenticateToken, requireRole(['WRITER', 'TEACHER', 'REVIEWER', 'ADMIN']), (req, res) => {
   const { id } = req.params;
   const { order } = req.body; // [{question_id, order_index}]
   if (!Array.isArray(order)) return res.status(400).json({ error: 'order 必须为数组 [{question_id, order_index}]' });

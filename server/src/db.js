@@ -21,7 +21,7 @@ function initSchema() {
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('ADMIN', 'REVIEWER', 'TEACHER', 'VIEWER')),
+      role TEXT NOT NULL CHECK (role IN ('ADMIN', 'REVIEWER', 'WRITER', 'VIEWER', 'TEACHER')),
       name TEXT NOT NULL,
       avatar TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP

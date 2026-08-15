@@ -35,7 +35,7 @@ const TRANSLATIONS = {
 		// Roles
 		roleAdmin: "ADMIN (Director)",
 		roleReviewer: "REVIEWER (Lead Auditor)",
-		roleTeacher: "EXAM CREATOR (SME)",
+		roleTeacher: "WRITER (Exam Creator)",
 		roleViewer: "VIEWER (Auditor)",
 
 		// Question Types
@@ -206,7 +206,7 @@ const TRANSLATIONS = {
 		// Roles
 		roleAdmin: "ADMIN 超级管理员",
 		roleReviewer: "REVIEWER 审核专家",
-		roleTeacher: "EXAM CREATOR 命题专家",
+		roleTeacher: "WRITER 命题专家",
 		roleViewer: "VIEWER 审计员",
 
 		// Question Types

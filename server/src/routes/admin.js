@@ -23,7 +23,7 @@ router.get('/users', (req, res) => {
 
 // 2. Create User
 router.post('/users', (req, res) => {
-  const { username, email, password, role = 'TEACHER', name } = req.body;
+  const { username, email, password, role = 'WRITER', name } = req.body;
 
   if (!username || !email || !password || !name) {
     return res.status(400).json({ error: '请填写完整用户信息 (用户名、邮箱、密码、姓名)' });

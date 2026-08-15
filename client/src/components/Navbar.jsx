@@ -55,6 +55,7 @@ export default function Navbar({ onNavigate }) {
 						<UserCheck className="w-3 h-3" /> REVIEWER
 					</span>
 				);
+			case "WRITER":
 			case "TEACHER":
 				return (
 					<span className="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200 rounded-md flex items-center gap-1">

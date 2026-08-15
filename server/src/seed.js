@@ -24,7 +24,7 @@ function seedDatabase() {
   const users = [
     { id: 'usr_admin', username: 'admin', email: 'admin@cert-eqms.com', role: 'ADMIN', name: 'Director Alex Chen (Certification Director)' },
     { id: 'usr_reviewer', username: 'reviewer', email: 'reviewer@cert-eqms.com', role: 'REVIEWER', name: 'Dr. Sarah Jenkins (Chief Exam Reviewer)' },
-    { id: 'usr_teacher', username: 'teacher', email: 'teacher@cert-eqms.com', role: 'TEACHER', name: 'Marcus Vance (Lead Subject Matter Expert)' },
+    { id: 'usr_teacher', username: 'teacher', email: 'teacher@cert-eqms.com', role: 'WRITER', name: 'Marcus Vance (Lead Subject Matter Expert)' },
     { id: 'usr_viewer', username: 'viewer', email: 'viewer@cert-eqms.com', role: 'VIEWER', name: 'Elena Rostova (Compliance Auditor)' },
   ];
 

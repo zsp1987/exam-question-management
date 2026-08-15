@@ -13,7 +13,7 @@
 - 4 built-in roles:
   - **Admin (ADMIN)**: Full access — user & role management, tag knowledge base, system-wide audit logs.
   - **Reviewer (REVIEWER)**: Dedicated Review Hall — review pending questions, add revision comments, approve or reject.
-  - **Teacher (TEACHER)**: Create & edit questions, manage options, rich-text / formula layout, version tracking, submit for review.
+  - **Teacher (WRITER)**: Create & edit questions, manage options, rich-text / formula layout, version tracking, submit for review.
   - **Viewer (VIEWER)**: Read-only question bank browsing, solution viewing, and statistics dashboards.
 - **Instant Role Switcher**: Built into the navbar — switch personas without logging out to verify permission boundaries.
 
