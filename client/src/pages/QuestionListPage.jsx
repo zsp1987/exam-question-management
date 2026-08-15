@@ -14,7 +14,8 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 
 export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQuestion }) {
-  const { isTeacher } = useAuth();
+  const { user, isTeacher, isReviewer } = useAuth();
+  const isPureWriter = (user?.role === 'WRITER' || user?.role === 'TEACHER') && !isReviewer;
   const { t, lang } = useI18n();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +141,7 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
           </div>
 
           <div className="flex items-center gap-3">
-            {isTeacher && (
+            {!isPureWriter && isTeacher && (
               <button
                 type="button"
                 onClick={() => onNavigate('create-question')}
@@ -284,7 +285,7 @@ export default function QuestionListPage({ onNavigate, onEditQuestion, onViewQue
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
             {lang === 'en' ? 'Try adjusting search terms or reset filters.' : '请尝试调整搜索关键词或重置筛选条件。'}
           </p>
-          {isTeacher && (
+          {!isPureWriter && isTeacher && (
             <button
               type="button"
               onClick={() => onNavigate('create-question')}

@@ -166,6 +166,30 @@ export const api = {
 		}),
 	getReviewRecords: (limit = 20) => request(`/reviews/records?limit=${limit}`),
 
+	// Tasks
+	getTasks: () => request("/tasks"),
+	getTask: (id) => request(`/tasks/${id}`),
+	createTask: (data) =>
+		request("/tasks", {
+			method: "POST",
+			body: JSON.stringify(data),
+		}),
+	createTaskQuestion: (taskId, data) =>
+		request(`/tasks/${taskId}/questions`, {
+			method: "POST",
+			body: JSON.stringify(data),
+		}),
+	submitTask: (taskId) =>
+		request(`/tasks/${taskId}/submit`, {
+			method: "POST",
+		}),
+	reviewTask: (taskId, data) =>
+		request(`/tasks/${taskId}/review`, {
+			method: "POST",
+			body: JSON.stringify(data),
+		}),
+	getTaskQuestions: (taskId) => request(`/tasks/${taskId}/questions`),
+
 	// Tags & Subjects
 	getTags: () => request("/tags"),
 	getSubjects: () => request("/tags/subjects"),

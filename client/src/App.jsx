@@ -40,7 +40,6 @@ function MainApp() {
 		const isViewer = role === "VIEWER";
 		const writerAllowed = new Set([
 			"questions",
-			"create-question",
 			"question-detail",
 			"profile",
 			"tasks",
@@ -103,9 +102,10 @@ function MainApp() {
 				isPureWriter &&
 				![
 					"questions",
-					"create-question",
 					"question-detail",
 					"profile",
+					"tasks",
+					"task-detail",
 				].includes(tab)
 			)
 				return;

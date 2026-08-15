@@ -47,7 +47,6 @@ export default function Sidebar({ currentTab, onNavigate }) {
 			id: "exam-folders",
 			label: t("navExamFolders"),
 			icon: FolderCheck,
-	ClipboardList,
 			show: !isPureWriter,
 			desc: t("navExamFoldersDesc"),
 		},
@@ -62,7 +61,7 @@ export default function Sidebar({ currentTab, onNavigate }) {
 			id: "create-question",
 			label: t("navCreateQuestion"),
 			icon: PlusCircle,
-			show: isTeacher && !isViewer,
+			show: false, // hidden per requirement: writer must create via Task only
 			highlight: true,
 			desc: t("navCreateQuestionDesc"),
 		},
