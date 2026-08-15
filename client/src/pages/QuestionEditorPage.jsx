@@ -4,7 +4,6 @@ import {
   HelpCircle, Tag, Star, Sparkles, AlertCircle, BookOpen
 } from 'lucide-react';
 import RichEditor from '../components/RichEditor';
-import MathRenderer from '../components/MathRenderer';
 import TagBadge from '../components/TagBadge';
 import { api } from '../api/client';
 import { useI18n } from '../context/I18nContext';
@@ -172,6 +171,35 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
       }
     }
 
+    // Enforce 50KB per-field cap (Q6/Q7) + collect katex_source
+    const collectLatex = (html) => {
+      if (!html) return [];
+      const re = /data-latex="([^"]*)"/g;
+      const out = []; let m;
+      while ((m = re.exec(html)) !== null) out.push(m[1]);
+      return out;
+    };
+    const allLatex = [
+      ...collectLatex(stemRichText),
+      ...options.flatMap(o => collectLatex(o.text || '')),
+      ...collectLatex(standardAnswer),
+      ...collectLatex(explanation),
+    ];
+    const katex_source = allLatex.join('\n');
+
+    // 50KB per-field check
+    const checkFieldSize = (name, html) => {
+      if (html && html.length > 50 * 1024) {
+        alert((lang === 'en' ? name + ' exceeds 50KB limit, please shorten.' : name + ' 超过 50KB 限制，请精简内容。'));
+        return false;
+      }
+      return true;
+    };
+    if (!checkFieldSize('Stem', stemRichText)) return;
+    if (!checkFieldSize('Explanation', explanation)) return;
+    if (!checkFieldSize('Standard Answer', standardAnswer)) return;
+    for (const o of options) { if (!checkFieldSize('Option ' + o.key, o.text)) return; }
+
     const payload = {
       title: title.trim(),
       type,
@@ -181,6 +209,7 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
       options: (type === 'SINGLE_CHOICE' || type === 'MULTIPLE_CHOICE') ? options : [],
       standard_answer_rich_text: standardAnswer,
       explanation_rich_text: explanation,
+      katex_source,
       tagIds: selectedTagIds,
       change_summary: changeSummary.trim(),
       submitForReview
@@ -462,20 +491,17 @@ export default function QuestionEditorPage({ questionId, onCancel, onSaved }) {
                   </button>
 
                   <div className="flex-1">
-                    <input
-                      type="text"
+                    <RichEditor
                       value={opt.text}
-                      onChange={(e) => handleOptionTextChange(idx, e.target.value)}
-                      placeholder={`Enter option ${opt.key} text...`}
-                      className="w-full px-3 py-1.5 text-xs bg-slate-50/50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                      onChange={(val) => handleOptionTextChange(idx, val)}
+                      label={`Option ${opt.key}`}
+                      placeholder={`Enter option ${opt.key} text (tables & formulas supported)…`}
+                      minHeight="min-h-[60px]"
+                      showFormulaBar={true}
                     />
                   </div>
 
-                  {opt.text && (
-                    <div className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs max-w-xs truncate">
-                      <MathRenderer content={opt.text} />
-                    </div>
-                  )}
+
 
                   {options.length > 2 && (
                     <button
